@@ -23,9 +23,13 @@ if (-not $RepoRoot) {
 }
 $CacheDir = Join-Path $RepoRoot ".cache"
 $BinDir   = Join-Path $RepoRoot "bin"
+$ApksDir  = Join-Path $RepoRoot "apks"
 
 if (-not (Test-Path $CacheDir)) { New-Item -ItemType Directory -Path $CacheDir -Force | Out-Null }
 if (-not (Test-Path $BinDir))   { New-Item -ItemType Directory -Path $BinDir -Force | Out-Null }
+if (Test-Path $ApksDir) {
+    Write-Host "[*] Phat hien goi cai dat Offline (apks/). Se uu tien su dung file san co!" -ForegroundColor Yellow
+}
 
 function Write-Step {
     param([string]$Msg)
@@ -143,8 +147,12 @@ Write-Info "Da dat toc do chuyen canh 0.5x (nhanh gap doi mac dinh)."
 # 5. Cài đặt & Cấu hình Projectivy Launcher
 Write-Step "Cai dat Projectivy Launcher (Chan PatchWall)..."
 $projectivyFile = Join-Path $CacheDir "ProjectivyLauncher.apk"
+$offlineProjectivy = Join-Path $ApksDir "ProjectivyLauncher.apk"
 
-if (-not (Test-Path $projectivyFile)) {
+if (Test-Path $offlineProjectivy) {
+    $projectivyFile = $offlineProjectivy
+    Write-Info "Su dung Projectivy Launcher co san tu thu muc apks/..."
+} elseif (-not (Test-Path $projectivyFile)) {
     Write-Info "Dang tim ban moi nhat tu GitHub..."
     $release = Invoke-RestMethod -Uri "https://api.github.com/repos/spocky/miproja1/releases/latest"
     $apkUrl = ($release.assets | Where-Object name -like "*.apk" | Select-Object -First 1).browser_download_url
@@ -205,8 +213,23 @@ if (-not $SkipApps) {
         }
 
         $apkDest = Join-Path $CacheDir "$($app.id)"
+        $offlineApk1 = Join-Path $ApksDir "$($app.id).apk"
+        $offlineApk2 = Join-Path $ApksDir "$($app.package).apk"
+        $offlineXapk = Join-Path $ApksDir "$($app.id).xapk"
         
-        # Tải theo loại nguồn
+        if (Test-Path $offlineApk1) {
+            Write-Info "Su dung APK offline co san: $offlineApk1..."
+            & $Adb -s $targetDevice install -r -g $offlineApk1 | Out-Null
+            Write-Info "Cai dat $($app.name) thanh cong!"
+            continue
+        } elseif (Test-Path $offlineApk2) {
+            Write-Info "Su dung APK offline co san: $offlineApk2..."
+            & $Adb -s $targetDevice install -r -g $offlineApk2 | Out-Null
+            Write-Info "Cai dat $($app.name) thanh cong!"
+            continue
+        } elseif (Test-Path $offlineXapk) {
+            $xapkPath = $offlineXapk
+        }
         if ($app.type -eq "github_release") {
             $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$($app.repo)/releases/latest"
             $targetAsset = $rel.assets | Where-Object name -like "*$($app.asset_filter)*" | Select-Object -First 1

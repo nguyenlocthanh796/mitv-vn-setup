@@ -1,6 +1,6 @@
 # 📺 MiTV Vietnam Toolkit - 1-Click ADB Setup
 
-> **Bộ công cụ 1-lệnh ADB tự động tối ưu hóa, chặn quảng cáo PatchWall và cài đặt trọn bộ ứng dụng truyền hình/giải trí Việt Nam cho Tivi Xiaomi nội địa.**
+> **Bộ công cụ 1-lệnh ADB tự động tối ưu hóa, chặn quảng cáo PatchWall và cài đặt trọn bộ 16 ứng dụng truyền hình/giải trí Việt Nam cho Tivi Xiaomi nội địa.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Android TV](https://img.shields.io/badge/Platform-Android%20TV-green.svg)]()
@@ -18,34 +18,49 @@ Tivi Xiaomi / Redmi nội địa Trung Quốc rất phổ biến tại Việt Na
 - ✅ **An toàn tuyệt đối 100%**: Không can thiệp phân vùng hệ thống, không unlock bootloader, không mất bảo hành.
 - ✅ **Giao diện Projectivy siêu mượt**: Khóa phím Home vĩnh viễn (Accessibility Override), không bao giờ bị nhảy lại PatchWall.
 - ✅ **Tăng tốc phản hồi 200%**: Ép tỉ lệ hoạt ảnh hệ thống về `0.5x`, bấm remote nhạy tức thì.
-- ✅ **Trọn bộ app chuẩn Android TV**: Tự động cài VTV Go, TV360, YouTube TV, SmartTube, Spotify, Send Files to TV, TV Bro.
+- ✅ **Trọn bộ 16 app chuẩn Android TV**: Tự động cài trọn bộ xem phim, truyền hình, bóng đá, âm nhạc và tiện ích.
+- ✅ **Hỗ trợ cả Online & Offline**: Chạy online qua 1 dòng lệnh hoặc tải trọn gói Offline (520MB) cắm USB không cần mạng.
 
 ---
 
-## ⚡ Cài đặt nhanh bằng 1 dòng lệnh
+## ⚡ 2 Cách cài đặt tiện lợi
 
-### Cách 1: Chạy trực tiếp qua Windows PowerShell (Khuyên dùng)
+### Cách 1: Chạy Online 1 dòng lệnh (Khuyên dùng)
 Mở **PowerShell** trên máy tính (cùng mạng Wi-Fi với TV) và dán dòng lệnh sau:
 
 ```powershell
 irm https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.ps1 | iex
 ```
 
-### Cách 2: Tải file chạy ngay (Dành cho người không rành kỹ thuật)
-1. Bấm vào nút **Code** -> **Download ZIP** (hoặc tải từ mục Releases).
-2. Giải nén thư mục vừa tải.
-3. Click đúp vào file `setup.bat`.
-
-### Cách 3: Dành cho macOS / Linux
+*Dành cho macOS / Linux:*
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.sh | bash
 ```
 
 ---
 
+### Cách 2: Tải trọn gói Offline (Dành cho thợ / Cài cắm USB không cần mạng)
+1. Vào mục **[Releases](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases)** tải file `MiTV-Vietnam-Full-Offline-v1.0.0.zip` (520MB).
+2. Giải nén vào máy tính hoặc USB.
+3. Click đúp vào file `setup.bat` ➔ Nhập IP Tivi ➔ Tự động cài đặt offline toàn bộ trong 1 phút!
+
+---
+
+## 📱 Dành cho người dùng chỉ có Điện thoại (Không có máy tính)
+
+1. Cài app **Bugjaeger Mobile ADB** từ Google Play Store trên điện thoại Android.
+2. Kết nối điện thoại vào cùng mạng Wi-Fi với Tivi.
+3. Mở Bugjaeger, bấm nút kết nối góc trên và nhập địa chỉ IP của Tivi (VD: `192.168.1.50:5555`).
+4. Chuyển sang tab **Commands** (biểu tượng dấu nhắc lệnh), dán lệnh sau và bấm **Run**:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.sh | bash
+   ```
+
+---
+
 ## 🛠️ Hướng dẫn chuẩn bị Tivi trước khi chạy
 
-Để máy tính kết nối được với Tivi, bạn cần bật **ADB Debugging (Gỡ lỗi USB)** trên Tivi:
+Bật **ADB Debugging (Gỡ lỗi USB)** trên Tivi:
 
 ### 1. Bật Tùy chọn nhà phát triển (Developer Options)
 - **Tiếng Trung**: Cài đặt (`设置`) ➔ Cài đặt thiết bị (`关于` hoặc `图像与声音`) ➔ Kiểu máy (`型号`) ➔ Bấm nút **OK** trên điều khiển **5 đến 7 lần liên tục** cho đến khi hiện thông báo đã là nhà phát triển.
@@ -60,18 +75,27 @@ curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/mai
 
 ---
 
-## 📦 Danh mục ứng dụng được cài đặt tự động
+## 📦 Danh mục 16 ứng dụng được đóng gói
 
-| Ứng dụng | Mục đích sử dụng | Nguồn |
+| Nhóm | Ứng dụng | Mô tả chức năng |
 | :--- | :--- | :--- |
-| **Projectivy Launcher** | Giao diện Android TV sạch, nhẹ, chặn PatchWall | [GitHub spocky](https://github.com/spocky/miproja1) |
-| **SmartTube** | Xem YouTube không quảng cáo, chặn tài trợ | [GitHub yuliskov](https://github.com/yuliskov/SmartTube) |
-| **VTV Go TV** | Xem truyền hình thời sự quốc gia VTV1–VTV9 | VTV Digital Center |
-| **TV360 Smart TV** | Kênh truyền hình trong nước & bóng đá Viettel | Viettel Telecom |
-| **YouTube TV** | Ứng dụng YouTube chuẩn Google cho TV | Google LLC |
-| **Spotify TV** | Nghe nhạc bản quyền, đồng bộ điện thoại | Spotify AB |
-| **Send Files to TV** | Bắn file, ảnh, APK từ điện thoại sang TV | Yablio |
-| **TV Bro** | Trình duyệt web remote, chặn quảng cáo | [GitHub truefedex](https://github.com/truefedex/tv-bro) |
+| **Giao diện** | **Projectivy Launcher** | Giao diện chuẩn Android TV, chặn vĩnh viễn PatchWall |
+| **Truyền hình** | **VTV Go TV** | Xem thời sự & truyền hình quốc gia trực tiếp VTV1–VTV9 |
+| | **TV360 Smart TV** | Truyền hình Viettel, phim & trực tiếp bóng đá trong nước |
+| | **FPT Play TV** | Kênh truyền hình bản quyền, giải Cúp C1, V-League |
+| | **VieON TV** | Show truyền hình thực tế & kho phim Việt/Hoa/Hàn |
+| | **OTT Navigator** | Trình phát danh sách kênh IPTV mượt mà chuyên nghiệp |
+| **Video & Phim** | **YouTube TV (Gốc)** | Bản YouTube TV chính thức của Google cho Android TV |
+| | **SmartTube** | YouTube Android TV không quảng cáo, chặn tài trợ SponsorBlock |
+| | **Cloudstream** | Kho phim điện ảnh, anime, series quốc tế miễn phí |
+| | **Stremio TV** | Xem phim & series chất lượng 4K qua torrent/addons |
+| | **VLC for Android** | Trình phát đa phương tiện từ USB/ổ cứng ngoài |
+| **Thể thao** | **SportzX Live** | Kênh trực tiếp thể thao, bóng đá quốc tế |
+| **Âm nhạc** | **Spotify TV** | Kho nhạc bản quyền, điều khiển qua điện thoại |
+| **Tiện ích** | **Send Files to TV** | Bắn file, ảnh, APK từ điện thoại sang TV qua Wi-Fi |
+| | **TV Bro** | Trình duyệt web remote có sẵn chặn quảng cáo |
+| | **RS File Manager** | Quản lý bộ nhớ, giải nén zip trực tiếp trên TV |
+| | **Speedtest TV** | Đo tốc độ mạng Wi-Fi / LAN của tivi |
 
 ---
 

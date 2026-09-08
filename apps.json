@@ -19,6 +19,15 @@
       "description": "YouTube Android TV không quảng cáo, chặn tài trợ SponsorBlock"
     },
     {
+      "id": "youtubetv",
+      "name": "YouTube for Android TV (Gốc)",
+      "package": "com.google.android.youtube.tv",
+      "type": "aptoide_query",
+      "query": "com.google.android.youtube.tv",
+      "category": "video",
+      "description": "Bản YouTube chính thức Google cho TV"
+    },
+    {
       "id": "vtvgo",
       "name": "VTV Go TV",
       "package": "vn.vtv.vtvgo",
@@ -35,6 +44,69 @@
       "query": "com.viettel.tv360.tv",
       "category": "tv",
       "description": "Truyền hình & thể thao Viettel"
+    },
+    {
+      "id": "fptplay",
+      "name": "FPT Play for Android TV",
+      "package": "net.fptplay.ottbox",
+      "type": "aptoide_query",
+      "query": "net.fptplay.ottbox",
+      "category": "tv",
+      "description": "Truyền hình, giải ngoại hạng & thể thao bản quyền FPT"
+    },
+    {
+      "id": "vieon",
+      "name": "VieON TV",
+      "package": "com.vieon.tv",
+      "type": "aptoide_query",
+      "query": "com.vieon.tv",
+      "category": "tv",
+      "description": "Show truyền hình & kho phim Việt/Hoa/Hàn"
+    },
+    {
+      "id": "ottnavigator",
+      "name": "OTT Navigator IPTV",
+      "package": "studio.scillarium.ottnavigator",
+      "type": "aptoide_query",
+      "query": "studio.scillarium.ottnavigator",
+      "category": "tv",
+      "description": "Trình phát danh sách kênh IPTV chuyên nghiệp"
+    },
+    {
+      "id": "cloudstream",
+      "name": "Cloudstream TV",
+      "package": "com.lagradost.cloudstream3.prerelease",
+      "type": "direct_url",
+      "url": "https://github.com/recloudstream/cloudstream/releases/download/v4.4.2/Cloudstream-v4.4.2.apk",
+      "category": "video",
+      "description": "Xem phim điện ảnh, anime, series miễn phí"
+    },
+    {
+      "id": "stremio",
+      "name": "Stremio for Android TV",
+      "package": "com.stremio.one",
+      "type": "direct_url",
+      "url": "https://dl.strem.io/four/v1.6.12/stremio-1.6.12-arm.apk",
+      "category": "video",
+      "description": "Xem phim & series quốc tế đa nguồn qua torrent/addons"
+    },
+    {
+      "id": "vlc",
+      "name": "VLC for Android TV",
+      "package": "org.videolan.vlc",
+      "type": "aptoide_query",
+      "query": "org.videolan.vlc",
+      "category": "video",
+      "description": "Trình phát đa phương tiện từ USB/ổ cứng ngoài"
+    },
+    {
+      "id": "sportzx",
+      "name": "SportzX Live",
+      "package": "com.sportzx.live",
+      "type": "direct_url",
+      "url": "https://sportzx.app/download/SportzX_new_2.6v.apk",
+      "category": "sports",
+      "description": "Trực tiếp bóng đá, thể thao quốc tế"
     },
     {
       "id": "spotify",
@@ -65,13 +137,22 @@
       "description": "Trình duyệt web cho remote tivi, tích hợp chặn quảng cáo"
     },
     {
-      "id": "youtubetv",
-      "name": "YouTube for Android TV (Gốc)",
-      "package": "com.google.android.youtube.tv",
+      "id": "rsfile",
+      "name": "RS File Manager",
+      "package": "com.rs.explorer.filemanager",
       "type": "aptoide_query",
-      "query": "com.google.android.youtube.tv",
-      "category": "video",
-      "description": "Bản YouTube chính thức Google cho TV"
+      "query": "com.rs.explorer.filemanager",
+      "category": "tools",
+      "description": "Quản lý file, bộ nhớ, giải nén zip trên tivi"
+    },
+    {
+      "id": "speedtest",
+      "name": "Speedtest for Android TV",
+      "package": "navwonders.com.speedtest",
+      "type": "aptoide_query",
+      "query": "navwonders.com.speedtest",
+      "category": "tools",
+      "description": "Đo tốc độ mạng Wi-Fi/LAN của tivi"
     }
   ]
 }
