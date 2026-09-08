@@ -135,7 +135,6 @@ adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 0.5 2>/de
 echo -e "\n${GREEN}[+] Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi...${NC}"
 adb -s "$TARGET_DEV" shell settings put global ntp_server time.android.com 2>/dev/null || true
 adb -s "$TARGET_DEV" shell settings put global auto_time 1 2>/dev/null || true
-adb -s "$TARGET_DEV" shell setprop persist.sys.timezone "Asia/Ho_Chi_Minh" 2>/dev/null || true
 adb -s "$TARGET_DEV" shell service call alarm 3 s16 "Asia/Ho_Chi_Minh" 2>/dev/null || true
 
 INSTALLED_PKGS=$(adb -s "$TARGET_DEV" shell pm list packages 2>/dev/null || true)

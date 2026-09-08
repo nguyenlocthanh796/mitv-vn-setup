@@ -240,10 +240,10 @@ if (-not $SkipApps -and -not $DebloatOnly) {
 
     if ($UpdateAll) {
         $isUpgradeMode = $true
-        $targetApps = $appsConfig.apps
+        $targetApps = @($appsConfig.apps)
     } elseif ($Update) {
         $isUpgradeMode = $true
-        $targetApps = $appsConfig.apps | Where-Object { $_.id -eq $Update -or $_.package -eq $Update }
+        $targetApps = @($appsConfig.apps | Where-Object { $_.id -eq $Update -or $_.package -eq $Update })
         if ($targetApps.Count -eq 0) {
             Write-Warn "Khong tim thay ung dung voi ID: $Update"
         }
@@ -339,7 +339,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
         }
     }
 
-    Write-Step "Bat dau xu ly ($($targetApps.Count) ung dung)..."
+    Write-Step "Bat dau xu ly ($(@($targetApps).Count) ung dung)..."
 
     foreach ($app in $targetApps) {
         Write-Host "`n  --> Ung dung: $($app.name)" -ForegroundColor Yellow
