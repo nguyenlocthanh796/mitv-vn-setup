@@ -1,0 +1,77 @@
+{
+  "system": {
+    "launcher": {
+      "name": "Projectivy Launcher",
+      "package": "com.spocky.projengmenu",
+      "type": "github_release",
+      "repo": "spocky/miproja1",
+      "description": "Giao diện Android TV siêu nhẹ, không quảng cáo, chặn PatchWall Xiaomi"
+    }
+  },
+  "apps": [
+    {
+      "id": "smarttube",
+      "name": "SmartTube",
+      "package": "org.smarttube.stable",
+      "type": "direct_url",
+      "url": "https://github.com/yuliskov/SmartTube/releases/download/latest/smarttube_stable.apk",
+      "category": "video",
+      "description": "YouTube Android TV không quảng cáo, chặn tài trợ SponsorBlock"
+    },
+    {
+      "id": "vtvgo",
+      "name": "VTV Go TV",
+      "package": "vn.vtv.vtvgo",
+      "type": "aptoide_query",
+      "query": "vn.vtv.vtvgo",
+      "category": "tv",
+      "description": "Đài truyền hình Việt Nam chính thức (VTV1-VTV9)"
+    },
+    {
+      "id": "tv360",
+      "name": "TV360 Smart TV",
+      "package": "com.viettel.tv360.tv",
+      "type": "aptoide_query",
+      "query": "com.viettel.tv360.tv",
+      "category": "tv",
+      "description": "Truyền hình & thể thao Viettel"
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify TV",
+      "package": "com.spotify.tv.android",
+      "type": "aptoide_query",
+      "query": "com.spotify.tv.android",
+      "category": "music",
+      "description": "Kho nhạc số bản quyền, điều khiển qua điện thoại"
+    },
+    {
+      "id": "sftv",
+      "name": "Send Files to TV",
+      "package": "com.yablio.sendfilestotv",
+      "type": "aptoide_query",
+      "query": "com.yablio.sendfilestotv",
+      "category": "tools",
+      "description": "Bắn file/ảnh/APK nhanh qua Wi-Fi từ điện thoại"
+    },
+    {
+      "id": "tvbro",
+      "name": "TV Bro",
+      "package": "com.phlox.tvwebbrowser",
+      "type": "github_release",
+      "repo": "truefedex/tv-bro",
+      "asset_filter": "generic-geckoExcluded.apk",
+      "category": "tools",
+      "description": "Trình duyệt web cho remote tivi, tích hợp chặn quảng cáo"
+    },
+    {
+      "id": "youtubetv",
+      "name": "YouTube for Android TV (Gốc)",
+      "package": "com.google.android.youtube.tv",
+      "type": "aptoide_query",
+      "query": "com.google.android.youtube.tv",
+      "category": "video",
+      "description": "Bản YouTube chính thức Google cho TV"
+    }
+  ]
+}

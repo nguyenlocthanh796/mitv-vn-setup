@@ -1,0 +1,269 @@
+<#
+.SYNOPSIS
+    MiTV Vietnam Toolkit - Bộ cài đặt 1-lệnh tự động cho Tivi Xiaomi qua ADB
+.DESCRIPTION
+    Tự động cài đặt giao diện Projectivy Launcher, chặn PatchWall tiếng Trung,
+    tối ưu hóa hoạt ảnh và cài trọn bộ ứng dụng truyền hình/giải trí Việt Nam.
+#>
+
+[CmdletBinding()]
+param (
+    [string]$DeviceIp = "",
+    [switch]$SkipApps = $false,
+    [switch]$DebloatOnly = $false
+)
+
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+$RepoRoot = $PSScriptRoot
+if (-not $RepoRoot) { $RepoRoot = Get-Location }
+$CacheDir = Join-Path $RepoRoot ".cache"
+$BinDir   = Join-Path $RepoRoot "bin"
+
+if (-not (Test-Path $CacheDir)) { New-Item -ItemType Directory -Path $CacheDir -Force | Out-Null }
+if (-not (Test-Path $BinDir))   { New-Item -ItemType Directory -Path $BinDir -Force | Out-Null }
+
+function Write-Step {
+    param([string]$Msg)
+    Write-Host "`n[+] $Msg" -ForegroundColor Green
+}
+
+function Write-Info {
+    param([string]$Msg)
+    Write-Host "    -> $Msg" -ForegroundColor Cyan
+}
+
+function Write-Warn {
+    param([string]$Msg)
+    Write-Host "    [!] $Msg" -ForegroundColor Yellow
+}
+
+function Write-Err {
+    param([string]$Msg)
+    Write-Host "    [X] $Msg" -ForegroundColor Red
+}
+
+Clear-Host
+Write-Host @"
+===================================================================
+    MiTV Vietnam Toolkit - 1-Click ADB Setup
+    Giai phap toi uu & Viet hoa Tivi Xiaomi Noi Dia
+===================================================================
+"@ -ForegroundColor Magenta
+
+# 1. Tìm hoặc tải ADB
+function Get-AdbPath {
+    $existing = Get-Command "adb" -ErrorAction SilentlyContinue
+    if ($existing) { return $existing.Source }
+
+    $commonPaths = @(
+        "D:\tools\platform-tools\adb.exe",
+        "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe",
+        "$BinDir\platform-tools\adb.exe",
+        "C:\scrcpy-win64-v4.1\adb.exe"
+    )
+
+    foreach ($p in $commonPaths) {
+        if (Test-Path $p) { return $p }
+    }
+
+    Write-Step "Khong tim thay ADB tren may. Dang tai Google Platform-Tools..."
+    $zipPath = Join-Path $BinDir "platform-tools.zip"
+    $url = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
+    
+    Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing
+    Expand-Archive -Path $zipPath -DestinationPath $BinDir -Force
+    Remove-Item $zipPath -Force
+
+    $adb = Join-Path $BinDir "platform-tools\adb.exe"
+    if (Test-Path $adb) { return $adb }
+    throw "Khong the khoi tao ADB tren he thong!"
+}
+
+$Adb = Get-AdbPath
+Write-Info "Su dung ADB tai: $Adb"
+
+# 2. Kết nối tới Tivi
+Write-Step "Kiem tra ket noi thiet bi ADB..."
+& $Adb start-server | Out-Null
+
+$targetDevice = ""
+$devicesOutput = & $Adb devices
+$lines = $devicesOutput -split "`n" | Where-Object { $_ -match "\s+device$" }
+
+if ($DeviceIp) {
+    Write-Info "Dang ket noi toi IP: $DeviceIp..."
+    & $Adb connect "$DeviceIp`:5555" | Out-Null
+    $targetDevice = if ($DeviceIp -match ":5555$") { $DeviceIp } else { "$DeviceIp`:5555" }
+} elseif ($lines.Count -eq 1) {
+    $targetDevice = ($lines[0] -split "\s+")[0]
+    Write-Info "Phat hien 1 thiet bi duy nhat: $targetDevice"
+} elseif ($lines.Count -gt 1) {
+    Write-Host "Danh sach thiet bi dang ket noi:" -ForegroundColor Yellow
+    for ($i=0; $i -lt $lines.Count; $i++) {
+        $dev = ($lines[$i] -split "\s+")[0]
+        Write-Host " [$i] $dev"
+    }
+    $choice = Read-Host "Chon so thu tu thiet bi"
+    $targetDevice = ($lines[[int]$choice] -split "\s+")[0]
+} else {
+    Write-Warn "Chua co thiet bi nao ket noi qua USB hoac Wi-Fi!"
+    $inputIp = Read-Host "Nhap dia chi IP cua Tivi Xiaomi (VD: 192.168.1.50)"
+    if (-not $inputIp) { throw "Chua nhap IP. Huy tien trinh." }
+    $targetDevice = if ($inputIp -match ":5555$") { $inputIp } else { "$inputIp`:5555" }
+    Write-Info "Dang ket noi toi $targetDevice..."
+    & $Adb connect $targetDevice | Out-Null
+}
+
+function Run-AdbShell {
+    param([string]$Cmd)
+    return (& $Adb -s $targetDevice shell $Cmd)
+}
+
+# 3. Đánh thức và kiểm tra thông tin Tivi
+Write-Step "Danh thuc va kiem tra thong so Tivi..."
+Run-AdbShell "input keyevent KEYCODE_WAKEUP" | Out-Null
+$abi = (Run-AdbShell "getprop ro.product.cpu.abi").Trim()
+$model = (Run-AdbShell "getprop ro.product.model").Trim()
+$androidVer = (Run-AdbShell "getprop ro.build.version.release").Trim()
+
+Write-Info "Model: $model | Android: $androidVer | CPU: $abi"
+
+# 4. Tăng tốc hệ thống & Tối ưu chuyển cảnh
+Write-Step "Toi uu toc do he thong & Hoat anh..."
+Run-AdbShell "settings put global window_animation_scale 0.5" | Out-Null
+Run-AdbShell "settings put global transition_animation_scale 0.5" | Out-Null
+Run-AdbShell "settings put global animator_duration_scale 0.5" | Out-Null
+Write-Info "Da dat toc do chuyen canh 0.5x (nhanh gap doi mac dinh)."
+
+# 5. Cài đặt & Cấu hình Projectivy Launcher
+Write-Step "Cai dat Projectivy Launcher (Chan PatchWall)..."
+$projectivyFile = Join-Path $CacheDir "ProjectivyLauncher.apk"
+
+if (-not (Test-Path $projectivyFile)) {
+    Write-Info "Dang tim ban moi nhat tu GitHub..."
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/spocky/miproja1/releases/latest"
+    $apkUrl = ($release.assets | Where-Object name -like "*.apk" | Select-Object -First 1).browser_download_url
+    Write-Info "Dang tai Projectivy Launcher ($($release.tag_name))..."
+    curl.exe -L -o $projectivyFile $apkUrl
+}
+
+Write-Info "Dang cai dat Projectivy vao Tivi..."
+& $Adb -s $targetDevice install -r -g $projectivyFile | Out-Null
+
+Write-Info "Cau hinh quyen Accessibility & Default Launcher..."
+Run-AdbShell "cmd package set-home-activity com.spocky.projengmenu/.ui.home.MainActivity" | Out-Null
+Run-AdbShell "settings put secure enabled_accessibility_services com.spocky.projengmenu/.services.ProjectivyAccessibilityService" | Out-Null
+Run-AdbShell "settings put secure accessibility_enabled 1" | Out-Null
+Run-AdbShell "settings put secure enabled_notification_listeners com.spocky.projengmenu/com.spocky.projengmenu.services.notification.NotificationListener" | Out-Null
+Write-Info "Da kich hoat chan PatchWall thanh cong!"
+
+if ($DebloatOnly) {
+    Write-Step "Hoan tat che do Debloat & Launcher!"
+    exit 0
+}
+
+# 6. Tải & Cài đặt bộ ứng dụng Việt Nam
+if (-not $SkipApps) {
+    Write-Step "Cai dat bo ung dung truyen hinh & giai tri Viet Nam..."
+    
+    $appsConfig = Get-Content (Join-Path $RepoRoot "apps.json") -Raw | ConvertFrom-Json
+
+    foreach ($app in $appsConfig.apps) {
+        Write-Host "`n  --> Ung dung: $($app.name)" -ForegroundColor Yellow
+        $installed = (Run-AdbShell "pm list packages $($app.package)") -match $app.package
+        if ($installed) {
+            Write-Info "Da cai dat tren TV. Bo qua."
+            continue
+        }
+
+        $apkDest = Join-Path $CacheDir "$($app.id)"
+        
+        # Tải theo loại nguồn
+        if ($app.type -eq "github_release") {
+            $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$($app.repo)/releases/latest"
+            $targetAsset = $rel.assets | Where-Object name -like "*$($app.asset_filter)*" | Select-Object -First 1
+            $downUrl = $targetAsset.browser_download_url
+            $filePath = "$apkDest.apk"
+            if (-not (Test-Path $filePath)) {
+                Write-Info "Dang tai tu GitHub: $($targetAsset.name)..."
+                curl.exe -L -o $filePath $downUrl
+            }
+            Write-Info "Dang cai dat qua ADB..."
+            & $Adb -s $targetDevice install -r -g $filePath | Out-Null
+
+        } elseif ($app.type -eq "direct_url") {
+            $filePath = "$apkDest.apk"
+            if (-not (Test-Path $filePath)) {
+                Write-Info "Dang tai truc tiep..."
+                curl.exe -L -o $filePath $app.url
+            }
+            Write-Info "Dang cai dat qua ADB..."
+            & $Adb -s $targetDevice install -r -g $filePath | Out-Null
+
+        } elseif ($app.type -eq "aptoide_query") {
+            $xapkPath = "$apkDest.xapk"
+            $extractFolder = "$apkDest-split"
+
+            if (-not (Test-Path $xapkPath) -and -not (Test-Path "$apkDest.apk")) {
+                Write-Info "Dang tim ban moi nhat qua Aptoide..."
+                $queryRes = Invoke-RestMethod -Uri "http://ws75.aptoide.com/api/7/apps/search?query=$($app.query)"
+                $item = $queryRes.datalist.list | Select-Object -First 1
+                if ($item -and $item.file.path) {
+                    Write-Info "Dang tai $($item.name)..."
+                    curl.exe -L -o $xapkPath $item.file.path
+                } else {
+                    Write-Warn "Khong tim thay link tai cho $($app.name), bo qua."
+                    continue
+                }
+            }
+
+            # Kiểm tra xem là APK đơn hay XAPK (split)
+            if (Test-Path $xapkPath) {
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                if (Test-Path $extractFolder) { Remove-Item $extractFolder -Recurse -Force }
+                try {
+                    [System.IO.Compression.ZipFile]::ExtractToDirectory($xapkPath, $extractFolder)
+                    $splitApks = Get-ChildItem -Path $extractFolder -Filter "*.apk" | Where-Object {
+                        $_.Name -match "base\.apk|$($app.package)\.apk|armeabi|xhdpi|mdpi|vi\.apk|en\.apk"
+                    } | Select-Object -ExpandProperty FullName
+
+                    if ($splitApks.Count -gt 1) {
+                        Write-Info "Cai dat dang Split APKs ($($splitApks.Count) goi)..."
+                        & $Adb -s $targetDevice install-multiple -r -g $splitApks | Out-Null
+                    } else {
+                        $singleApk = Get-ChildItem -Path $extractFolder -Filter "*.apk" | Select-Object -First 1 -ExpandProperty FullName
+                        Write-Info "Cai dat APK don..."
+                        & $Adb -s $targetDevice install -r -g $singleApk | Out-Null
+                    }
+                } catch {
+                    # Neu file thuc chat la apk thuong
+                    Write-Info "Thu cai dat truc tiep file APK..."
+                    & $Adb -s $targetDevice install -r -g $xapkPath | Out-Null
+                }
+            } elseif (Test-Path "$apkDest.apk") {
+                & $Adb -s $targetDevice install -r -g "$apkDest.apk" | Out-Null
+            }
+        }
+
+        Write-Info "Cai dat $($app.name) thanh cong!"
+    }
+}
+
+# 7. Mở Launcher hoàn thiện
+Write-Step "Mo giao dien chinh Projectivy tren Tivi..."
+Run-AdbShell "am start -n com.spocky.projengmenu/.ui.home.MainActivity" | Out-Null
+
+Write-Host @"
+
+===================================================================
+    CHUC MUNG! TOI UU & CAI DAT HOAN TAT THANH CONG!
+===================================================================
+  [V] Giao dien: Projectivy Launcher da khoa phim Home.
+  [V] He thong: Toc do hoat anh 0.5x sieu muot.
+  [V] Ung dung: YouTube TV, SmartTube, VTV Go, TV360, Spotify, SFTV, TV Bro.
+  
+  Moi thac mac & gop y, vui long truy cap repo GitHub!
+===================================================================
+"@ -ForegroundColor Green

@@ -1,0 +1,6 @@
+.cache/
+bin/
+*.apk
+*.xapk
+*.zip
+*.log
