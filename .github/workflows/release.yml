@@ -1,0 +1,29 @@
+name: Release Packager
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    name: Package Standalone Offline Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Platform Tools & Build Bundle
+        shell: pwsh
+        run: |
+          ./scripts/package-release.ps1 -Version "${{ github.ref_name }}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "MiTV Vietnam Toolkit ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            *.zip

@@ -1,0 +1,49 @@
+name: "🐛 Báo Cáo Lỗi (Bug Report)"
+description: "Báo cáo sự cố khi kết nối hoặc cài đặt ứng dụng trên Tivi Xiaomi"
+title: "[BUG] <Mô tả ngắn lỗi gặp phải>"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã báo cáo lỗi! Vui lòng cung cấp chi tiết thông tin thiết bị để chúng tôi hỗ trợ nhanh nhất.
+  - type: input
+    id: tv_model
+    attributes:
+      label: Model Tivi Xiaomi / Redmi
+      description: "Ví dụ: Xiaomi EA55 2023, Redmi MAX 85, Xiaomi A55..."
+      placeholder: "Ví dụ: Xiaomi EA55"
+    validations:
+      required: true
+  - type: dropdown
+    id: host_os
+    attributes:
+      label: Hệ điều hành máy chạy script
+      description: "Bạn chạy lệnh trên thiết bị nào?"
+      options:
+        - "Windows 10 / 11 (PowerShell)"
+        - "macOS (Terminal bash/zsh)"
+        - "Linux / Ubuntu"
+        - "Android (Termux / Bugjaeger)"
+        - "iPhone / iPad (iSH Shell)"
+    validations:
+      required: true
+  - type: textarea
+    id: error_log
+    attributes:
+      label: Nhật ký lỗi (Terminal Output / Log)
+      description: "Copy toàn bộ nội dung hiển thị trên terminal hoặc ảnh chụp lỗi."
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Các bước tái hiện lỗi
+      description: "Bạn đã thao tác những bước nào trước khi bị lỗi?"
+      value: |
+        1. Bật gỡ lỗi USB trên tivi.
+        2. Chạy lệnh ...
+        3. Xuất hiện thông báo lỗi ...
+    validations:
+      required: false

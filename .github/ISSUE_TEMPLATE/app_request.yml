@@ -1,0 +1,40 @@
+name: "📦 Đề Xuất Thêm Ứng Dụng (App Request)"
+description: "Đề xuất thêm ứng dụng Android TV mới vào bộ cài đặt mặc định"
+title: "[APP] <Tên ứng dụng>"
+labels: ["enhancement", "app-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Đề xuất ứng dụng mới cho kho ứng dụng MiTV Vietnam Toolkit.
+  - type: input
+    id: app_name
+    attributes:
+      label: Tên ứng dụng
+      placeholder: "Ví dụ: Monster TV, Kodi..."
+    validations:
+      required: true
+  - type: input
+    id: package_name
+    attributes:
+      label: Package Name (Nếu biết)
+      placeholder: "Ví dụ: org.xbmc.kodi"
+    validations:
+      required: false
+  - type: input
+    id: download_link
+    attributes:
+      label: Link tải APK chính thức (GitHub / Trang chủ)
+      placeholder: "https://..."
+    validations:
+      required: true
+  - type: checkboxes
+    id: tv_compatible
+    attributes:
+      label: Độ tương thích Android TV
+      description: "Ứng dụng này có hỗ trợ remote điều khiển (D-Pad) không?"
+      options:
+        - label: "Ứng dụng có giao diện Leanback TV chuẩn, điều khiển mượt bằng remote D-pad"
+          required: true
+        - label: "Ứng dụng miễn phí hoặc có gói xem miễn phí hợp pháp"
+          required: true
