@@ -17,7 +17,10 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $RepoRoot = $PSScriptRoot
-if (-not $RepoRoot) { $RepoRoot = Get-Location }
+if (-not $RepoRoot) {
+    # Khi chạy trực tiếp qua irm ... | iex
+    $RepoRoot = Join-Path $env:TEMP "mitv-vn-setup"
+}
 $CacheDir = Join-Path $RepoRoot ".cache"
 $BinDir   = Join-Path $RepoRoot "bin"
 
@@ -168,7 +171,30 @@ if ($DebloatOnly) {
 if (-not $SkipApps) {
     Write-Step "Cai dat bo ung dung truyen hinh & giai tri Viet Nam..."
     
-    $appsConfig = Get-Content (Join-Path $RepoRoot "apps.json") -Raw | ConvertFrom-Json
+    $appsJsonLocal = Join-Path $RepoRoot "apps.json"
+    $appsConfig = $null
+    if (Test-Path $appsJsonLocal) {
+        $appsConfig = Get-Content $appsJsonLocal -Raw | ConvertFrom-Json
+    } else {
+        Write-Info "Dang tai danh muc ung dung tu GitHub..."
+        try {
+            $remoteUrl = "https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/apps.json"
+            $appsConfig = Invoke-RestMethod -Uri $remoteUrl
+        } catch {
+            Write-Warn "Khong the tai apps.json tu GitHub, su dung danh sach du phong mac dinh..."
+            $appsConfig = [PSCustomObject]@{
+                apps = @(
+                    [PSCustomObject]@{ id="smarttube"; name="SmartTube"; package="org.smarttube.stable"; type="direct_url"; url="https://github.com/yuliskov/SmartTube/releases/download/latest/smarttube_stable.apk" },
+                    [PSCustomObject]@{ id="vtvgo"; name="VTV Go TV"; package="vn.vtv.vtvgo"; type="aptoide_query"; query="vn.vtv.vtvgo" },
+                    [PSCustomObject]@{ id="tv360"; name="TV360 Smart TV"; package="com.viettel.tv360.tv"; type="aptoide_query"; query="com.viettel.tv360.tv" },
+                    [PSCustomObject]@{ id="spotify"; name="Spotify TV"; package="com.spotify.tv.android"; type="aptoide_query"; query="com.spotify.tv.android" },
+                    [PSCustomObject]@{ id="sftv"; name="Send Files to TV"; package="com.yablio.sendfilestotv"; type="aptoide_query"; query="com.yablio.sendfilestotv" },
+                    [PSCustomObject]@{ id="tvbro"; name="TV Bro"; package="com.phlox.tvwebbrowser"; type="github_release"; repo="truefedex/tv-bro"; asset_filter="generic-geckoExcluded.apk" },
+                    [PSCustomObject]@{ id="youtubetv"; name="YouTube for Android TV"; package="com.google.android.youtube.tv"; type="aptoide_query"; query="com.google.android.youtube.tv" }
+                )
+            }
+        }
+    }
 
     foreach ($app in $appsConfig.apps) {
         Write-Host "`n  --> Ung dung: $($app.name)" -ForegroundColor Yellow

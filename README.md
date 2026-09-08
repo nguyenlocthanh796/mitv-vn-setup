@@ -28,7 +28,7 @@ Tivi Xiaomi / Redmi nội địa Trung Quốc rất phổ biến tại Việt Na
 Mở **PowerShell** trên máy tính (cùng mạng Wi-Fi với TV) và dán dòng lệnh sau:
 
 ```powershell
-irm https://raw.githubusercontent.com/<username>/mitv-vn-setup/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.ps1 | iex
 ```
 
 ### Cách 2: Tải file chạy ngay (Dành cho người không rành kỹ thuật)
@@ -38,7 +38,7 @@ irm https://raw.githubusercontent.com/<username>/mitv-vn-setup/main/setup.ps1 | 
 
 ### Cách 3: Dành cho macOS / Linux
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<username>/mitv-vn-setup/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.sh | bash
 ```
 
 ---
