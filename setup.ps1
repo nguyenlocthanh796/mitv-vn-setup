@@ -186,14 +186,21 @@ Run-AdbShell "settings put global animator_duration_scale 0.5" | Out-Null
 Write-Step "Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi..."
 Run-AdbShell "settings put global ntp_server time.android.com" | Out-Null
 Run-AdbShell "settings put global auto_time 1" | Out-Null
-Run-AdbShell "setprop persist.sys.timezone Asia/Ho_Chi_Minh" | Out-Null
 Run-AdbShell "service call alarm 3 s16 Asia/Ho_Chi_Minh" | Out-Null
 
-Run-AdbShell "pm disable-user --user 0 com.miui.systemAdSolution" | Out-Null
-Run-AdbShell "pm disable-user --user 0 com.xiaomi.mitv.advertise" | Out-Null
-Run-AdbShell "pm disable-user --user 0 com.miui.tv.analytics" | Out-Null
-Run-AdbShell "pm disable-user --user 0 com.xiaomi.mibox.gamecenter" | Out-Null
-Write-Info "Da dat may chu gio GMT+7 (time.android.com) va tat quang cao Xiaomi."
+$installedPkgs = Run-AdbShell "pm list packages"
+$bloatPackages = @(
+    "com.miui.systemAdSolution",
+    "com.xiaomi.mitv.advertise",
+    "com.miui.tv.analytics",
+    "com.xiaomi.mibox.gamecenter"
+)
+foreach ($bp in $bloatPackages) {
+    if ($installedPkgs -match "package:$bp") {
+        Run-AdbShell "pm disable-user --user 0 $bp" | Out-Null
+    }
+}
+Write-Info "Da dat may chu gio GMT+7 (time.android.com) va toi uu he thong."
 
 # 4. Cai dat Launcher neu chua co
 $launcherInstalled = (Run-AdbShell "pm list packages com.spocky.projengmenu") -match "com.spocky.projengmenu"
@@ -211,14 +218,18 @@ if (-not $launcherInstalled) {
 
     Write-Info "Dang cai dat Projectivy vao Tivi..."
     & $Adb -s $targetDevice install -r -g $projectivyFile | Out-Null
-    Run-AdbShell "cmd package set-home-activity com.spocky.projhost/.ui.HomeActivity" | Out-Null
-    Run-AdbShell "settings put secure enabled_accessibility_services com.spocky.projhost/.services.ProjectivyAccessibilityService" | Out-Null
+    Run-AdbShell "cmd package set-home-activity com.spocky.projengmenu/.ui.home.MainActivity" | Out-Null
+    Run-AdbShell "settings put secure enabled_accessibility_services com.spocky.projengmenu/.services.ProjectivyAccessibilityService" | Out-Null
     Run-AdbShell "settings put secure accessibility_enabled 1" | Out-Null
 }
 
 # 5. Cai dat / Cap nhat ung dung
 if (-not $SkipApps -and -not $DebloatOnly) {
     $appsJsonPath = Join-Path $RepoRoot "apps.json"
+    if (-not (Test-Path $appsJsonPath)) {
+        Write-Info "Dang tai danh muc apps.json tu GitHub..."
+        curl.exe -L -s -o $appsJsonPath "https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/apps.json"
+    }
     $appsConfig = $null
     if (Test-Path $appsJsonPath) {
         $appsConfig = Get-Content $appsJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -403,7 +414,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
 
 # 6. Khoi dong giao dien
 Write-Step "Khoi chay giao dien Projectivy Launcher..."
-Run-AdbShell "am start -n com.spocky.projhost/.ui.HomeActivity" | Out-Null
+Run-AdbShell "am start -n com.spocky.projengmenu/.ui.home.MainActivity" | Out-Null
 
 Write-Host @"
 ===================================================================

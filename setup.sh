@@ -138,21 +138,23 @@ adb -s "$TARGET_DEV" shell settings put global auto_time 1 2>/dev/null || true
 adb -s "$TARGET_DEV" shell setprop persist.sys.timezone "Asia/Ho_Chi_Minh" 2>/dev/null || true
 adb -s "$TARGET_DEV" shell service call alarm 3 s16 "Asia/Ho_Chi_Minh" 2>/dev/null || true
 
-adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.miui.systemAdSolution 2>/dev/null || true
-adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.xiaomi.mitv.advertise 2>/dev/null || true
-adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.miui.tv.analytics 2>/dev/null || true
-adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.xiaomi.mibox.gamecenter 2>/dev/null || true
+INSTALLED_PKGS=$(adb -s "$TARGET_DEV" shell pm list packages 2>/dev/null || true)
+for bp in com.miui.systemAdSolution com.xiaomi.mitv.advertise com.miui.tv.analytics com.xiaomi.mibox.gamecenter; do
+    if echo "$INSTALLED_PKGS" | grep -q "package:$bp"; then
+        adb -s "$TARGET_DEV" shell pm disable-user --user 0 "$bp" >/dev/null 2>&1 || true
+    fi
+done
 
 # Kiem tra launcher
-if ! adb -s "$TARGET_DEV" shell pm list packages com.spocky.projengmenu 2>/dev/null | grep -q "com.spocky.projengmenu"; then
+if ! echo "$INSTALLED_PKGS" | grep -q "com.spocky.projengmenu"; then
     echo -e "\n${GREEN}[+] Cai dat Projectivy Launcher (Chan PatchWall)...${NC}"
     PROJECTIVY_APK="$CACHE_DIR/ProjectivyLauncher.apk"
     if [ ! -f "$PROJECTIVY_APK" ]; then
         curl -L -s -o "$PROJECTIVY_APK" "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/ProjectivyLauncher.apk"
     fi
     adb -s "$TARGET_DEV" install -r -g "$PROJECTIVY_APK" >/dev/null 2>&1 || true
-    adb -s "$TARGET_DEV" shell cmd package set-home-activity com.spocky.projhost/.ui.HomeActivity 2>/dev/null || true
-    adb -s "$TARGET_DEV" shell settings put secure enabled_accessibility_services com.spocky.projhost/.services.ProjectivyAccessibilityService 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell cmd package set-home-activity com.spocky.projengmenu/.ui.home.MainActivity 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put secure enabled_accessibility_services com.spocky.projengmenu/.services.ProjectivyAccessibilityService 2>/dev/null || true
     adb -s "$TARGET_DEV" shell settings put secure accessibility_enabled 1 2>/dev/null || true
 fi
 
@@ -339,7 +341,7 @@ for item in "${INSTALL_TARGETS[@]}"; do
 done
 
 echo -e "\n${GREEN}[+] Khoi chay giao dien Projectivy Launcher tren TV...${NC}"
-adb -s "$TARGET_DEV" shell am start -n com.spocky.projhost/.ui.HomeActivity >/dev/null 2>&1 || true
+adb -s "$TARGET_DEV" shell am start -n com.spocky.projengmenu/.ui.home.MainActivity >/dev/null 2>&1 || true
 
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}       HOAN TAT TIEN TRINH TREN TIVI!               ${NC}"
