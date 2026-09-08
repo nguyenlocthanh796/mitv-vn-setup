@@ -1,14 +1,29 @@
-# 📺 MiTV Vietnam Toolkit - 1-Click ADB Setup
+# 📺 MiTV Vietnam Toolkit - Cài Tiếng Việt, Xóa PatchWall, Tối Ưu Tivi Xiaomi / Redmi Nội Địa (1-Lệnh ADB)
 
-> **Bộ công cụ 1-lệnh ADB tự động tối ưu hóa, chặn quảng cáo PatchWall và cài đặt trọn bộ 16 ứng dụng truyền hình/giải trí Việt Nam cho Tivi Xiaomi nội địa.**
+> **Giải pháp 1-lệnh ADB tự động 100%: Xóa sạch quảng cáo tiếng Trung, cài đặt Projectivy Launcher làm mặc định, khóa phím Home, tăng tốc hoạt ảnh 200% và cài trọn bộ 16 ứng dụng Android TV Việt Nam.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Android TV](https://img.shields.io/badge/Platform-Android%20TV-green.svg)]()
 [![Device: Xiaomi / Redmi](https://img.shields.io/badge/Device-Xiaomi%20%7C%20Redmi-orange.svg)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/nguyenlocthanh796/mitv-vn-setup/pulls)
+
+*Keywords: cài tiếng việt tivi xiaomi, xóa giao diện patchwall, xóa quảng cáo tivi xiaomi, cài youtube không quảng cáo tivi xiaomi, tối ưu tivi xiaomi nội địa, projectivy launcher xiaomi tv, xiaomi tv debloat, vtv go cho tivi xiaomi.*
 
 ---
 
-## 🎯 Tại sao dự án này ra đời?
+## 📑 Mục lục
+- [🎯 Tại sao cần công cụ này?](#-tại-sao-cần-công-cụ-này)
+- [⚡ 2 Cách cài đặt tiện lợi](#-2-cách-cài-đặt-tiện-lợi)
+  - [Cách 1: Chạy Online 1 dòng lệnh (Khuyên dùng)](#cách-1-chạy-online-1-dòng-lệnh-khuyên-dùng)
+  - [Cách 2: Tải trọn gói Offline (Dành cho thợ / Cắm USB)](#cách-2-tải-trọn-gói-offline-dành-cho-thợ--cài-cắm-usb-không-cần-mạng)
+- [📱 Cài đặt bằng Điện thoại (Android & iOS)](#-hướng-dẫn-cài-đặt-bằng-điện-thoại-android--ios)
+- [🛠️ Hướng dẫn bật ADB trên Tivi Xiaomi](#️-hướng-dẫn-chuẩn-bị-tivi-trước-khi-chạy)
+- [📦 Danh mục 16 ứng dụng được cài đặt](#-danh-mục-16-ứng-dụng-được-đóng-gói)
+- [❓ Câu hỏi thường gặp (FAQ)](#-câu-hỏi-thường-gặp-faq)
+
+---
+
+## 🎯 Tại sao cần công cụ này?
 
 Tivi Xiaomi / Redmi nội địa Trung Quốc rất phổ biến tại Việt Nam vì giá rẻ, cấu hình cao và màn hình lớn. Tuy nhiên:
 - Giao diện **PatchWall** tràn ngập tiếng Trung, không có Google Play, người già và trẻ nhỏ không thể dùng được.
