@@ -166,7 +166,7 @@ Yêu cầu máy tính kết nối cùng mạng Wi-Fi hoặc mạng dây LAN vớ
 
 Thích hợp cho thợ kỹ thuật, cửa hàng điện máy hoặc khu vực mạng internet chậm:
 
-1. Vào mục **[Releases](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases)** tải gói `MiTV-Vietnam-Full-Offline-v1.0.0.zip` (dung lượng 520MB, đã tích hợp sẵn toàn bộ 16 APK và công cụ ADB).
+1. Tải trực tiếp gói offline: **[MiTV-Vietnam-Full-Offline-v1.0.0.zip](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/MiTV-Vietnam-Full-Offline-v1.0.0.zip)** (523MB, đã tích hợp sẵn toàn bộ 16 APK và công cụ ADB) hoặc vào mục **[Releases](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases)**.
 2. Giải nén file zip vào máy tính hoặc cắm USB.
 3. Click đúp vào file `setup.bat` ➔ Nhập địa chỉ IP Tivi ➔ Quá trình cài đặt diễn ra offline hoàn toàn trong 60 giây.
 
