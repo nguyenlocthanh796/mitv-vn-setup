@@ -93,11 +93,15 @@ Không bắt buộc sử dụng máy tính. Bộ script hỗ trợ thực thi tr
 
 ### Bước 1: Mở tùy chọn nhà phát triển (Developer Options)
 * **Giao diện tiếng Trung**: `设置` (Cài đặt) ➔ `关于` (Giới thiệu) ➔ `型号` (Model) ➔ Nhấn phím **OK** trên remote **5 đến 7 lần liên tục** cho đến khi hệ thống báo mở quyền nhà phát triển.
-* **Giao diện tiếng Anh**: `Settings` ➔ `Device Preferences` ➔ `About` ➔ Nhấn phím **OK** 5 lần vào dòng `Build`.
+* **Giao diện tiếng Anh**: `Settings` ➔ `Device Preferences` ➔ `About` ➔ Nhấn phím **OK** 5 lần vào dòng `Build` (hoặc `Model`).
+
+![Bật Tùy chọn nhà phát triển trên Tivi Xiaomi](docs/images/step1_enable_developer_options.png)
 
 ### Bước 2: Cho phép gỡ lỗi ADB (ADB Debugging)
 * **Giao diện tiếng Trung**: `账号与安全` (Tài khoản & Bảo mật) ➔ `ADB调试` (ADB Debugging) ➔ Chọn **开启 (Bật)**.
 * **Giao diện tiếng Anh**: `Developer Options` ➔ Chuyển `USB Debugging` (hoặc `ADB Debugging`) sang **ON**.
+
+![Bật Gỡ lỗi USB Debugging trên Tivi Xiaomi](docs/images/step2_enable_usb_debugging.png)
 
 ### Bước 3: Xác định địa chỉ IP nội mạng của Tivi
 * Vào mục `Network / Wi-Fi` trên Tivi ➔ Chọn mạng đang kết nối ➔ Ghi nhận địa chỉ IP (Ví dụ: `192.168.1.50`).
@@ -105,6 +109,8 @@ Không bắt buộc sử dụng máy tính. Bộ script hỗ trợ thực thi tr
 ---
 
 ## 5. Danh mục 16 ứng dụng tích hợp (Leanback UI)
+
+![Giao diện Projectivy Launcher và 16 ứng dụng sau khi tối ưu](docs/images/step3_projectivy_home_screen.png)
 
 Tất cả các gói phần mềm đều được kiểm định tương thích hoàn toàn với điều khiển cầm tay:
 

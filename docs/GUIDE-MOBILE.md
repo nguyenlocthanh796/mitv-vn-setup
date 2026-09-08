@@ -14,17 +14,21 @@
   1. Dùng remote vào mục **Cài đặt** (biểu tượng bánh răng `设置`).
   2. Chọn mục **Giới thiệu thiết bị** (`关于`).
   3. Tìm đến dòng **Kiểu máy** (`型号`).
-  4. Bấm phím **OK** trên remote liên tục **5 đến 7 lần** cho đến khi màn hình hiện một dòng chữ thông báo nhỏ ở dưới đáy (đã kích hoạt chế độ nhà phát triển).
+  4. Bấm phím **OK** trên remote liên tục **5 đến 7 lần** cho đến khi màn hình hiện thông báo đã kích hoạt chế độ nhà phát triển.
 - **Nếu Tivi hiển thị Tiếng Anh**:
   1. Vào `Settings` ➔ `Device Preferences` ➔ `About`.
-  2. Bấm phím **OK** liên tục 5 lần vào dòng `Build`.
+  2. Bấm phím **OK** liên tục 5 lần vào dòng `Build` (hoặc `Model`).
+
+![Bật tùy chọn nhà phát triển trên Tivi Xiaomi](images/step1_enable_developer_options.png)
 
 ### 2. Bật Gỡ lỗi ADB (ADB Debugging)
 - **Tivi Tiếng Trung**: 
   1. Quay lại menu Cài đặt chính ➔ Chọn **Tài khoản & An toàn** (`账号与安全`).
   2. Tìm dòng **ADB调试** (ADB Debugging) ➔ Chọn chuyển sang **开启** (Bật/Cho phép).
 - **Tivi Tiếng Anh**:
-  1. Vào `Developer Options` ➔ Chuyển `ADB Debugging` sang trạng thái **ON**.
+  1. Vào `Developer Options` ➔ Chuyển `USB Debugging` (hoặc `ADB Debugging`) sang trạng thái **ON**.
+
+![Bật gỡ lỗi USB Debugging](images/step2_enable_usb_debugging.png)
 
 ### 3. Xem địa chỉ IP của Tivi
 - Vào phần **Cài đặt Wi-Fi** trên Tivi ➔ Bấm vào tên Wi-Fi đang kết nối ➔ Ghi lại dãy số IP hiển thị trên màn hình (Ví dụ: `192.168.1.50`).
