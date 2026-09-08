@@ -174,13 +174,32 @@ Thích hợp cho thợ kỹ thuật, cửa hàng điện máy hoặc khu vực m
 
 ## 5. Bảng hướng dẫn chọn Chế độ cài đặt theo cấu hình Tivi
 
-Khi chạy script, hệ thống sẽ đưa ra 3 lựa chọn kèm bộ đếm ngược 10 giây tự động:
+Khi chạy script, hệ thống sẽ đưa ra 4 lựa chọn kèm bộ đếm ngược 10 giây tự động:
 
 | Chế độ | Số lượng ứng dụng | Danh sách ứng dụng | Dòng Tivi khuyến nghị | Trải nghiệm mang lại |
 | :--- | :---: | :--- | :--- | :--- |
 | **[1] ĐẦY ĐỦ<br>(Full - Mặc định)** | **16 app** | Trọn bộ: Projectivy, SmartTube, VTV Go, TV360, FPT Play, VieON, Cloudstream, Stremio, VLC, Spotify, Tiện ích... | Xiaomi EA55, EA65, EA70, EA75, S55, S65, Redmi MAX (RAM 1.5GB – 4GB) | Đầy đủ mọi tiện ích, xem bóng đá, truyền hình, phim chiếu rạp và YouTube không quảng cáo. |
 | **[2] CƠ BẢN<br>(Basic / Siêu nhẹ)** | **5 app** | **Projectivy Launcher** + **SmartTube** + **VTV Go** + **TV360** + **Send Files to TV** | Xiaomi EA32, EA40, 4A, 4C, Mi Box đời cũ (RAM 1GB, ROM 8GB) | Tối ưu hóa bộ nhớ tối đa, không giật lag, giao diện chạy siêu mượt, phù hợp cho người cao tuổi. |
 | **[3] TỰ CHỌN<br>(Custom Selection)** | **Tùy biến** | Người dùng nhập dãy số tương ứng với app muốn cài (Ví dụ: `1 3 5 7` hoặc `1,2,6`). | Mọi dòng Tivi Xiaomi / Redmi | Tự do chọn các ứng dụng yêu thích theo nhu cầu cá nhân. |
+| **[4] CẬP NHẬT<br>(Upgrade / Giữ Data)** | **Tùy chọn** | Nâng cấp 1 app chỉ định hoặc toàn bộ app lên bản mới nhất từ GitHub CDN. Cài đè với cờ `-r -d`, **bảo toàn 100% tài khoản đăng nhập & cấu hình**. | Mọi dòng Tivi Xiaomi / Redmi | Nâng cấp siêu tốc 3-5 giây mỗi app, không cần gỡ ra cài lại, không mất dữ liệu. |
+
+> [!TIP]
+> **Nâng cấp trực tiếp 1 app qua dòng lệnh:**
+> * **Linux / macOS / Termux (Android) / iSH (iOS)**:
+>   ```bash
+>   ./setup.sh --update tv360       # Nâng cấp riêng app TV360
+>   ./setup.sh --update all         # Nâng cấp toàn bộ các app có bản mới
+>   ```
+> * **Windows PowerShell**:
+>   ```powershell
+>   .\setup.ps1 -Update tv360       # Nâng cấp riêng TV360
+>   .\setup.ps1 -UpdateAll          # Nâng cấp toàn bộ app
+>   ```
+> * **Dành cho Quản trị viên / Tác giả khi có file APK mới**:
+>   ```bash
+>   python scripts/publish_app.py --file C:\path\to\tv360_v6.3.apk --app tv360 --version "6.3" --code 632
+>   ```
+>   Script sẽ tự upload APK lên GitHub Releases CDN, tự cập nhật `apps.json` trong 5 giây!
 
 ---
 
