@@ -46,15 +46,11 @@ curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/mai
 
 ---
 
-## 📱 Dành cho người dùng chỉ có Điện thoại (Không có máy tính)
+## 📱 Hướng dẫn cài đặt bằng Điện thoại (Android & iOS)
 
-1. Cài app **Bugjaeger Mobile ADB** từ Google Play Store trên điện thoại Android.
-2. Kết nối điện thoại vào cùng mạng Wi-Fi với Tivi.
-3. Mở Bugjaeger, bấm nút kết nối góc trên và nhập địa chỉ IP của Tivi (VD: `192.168.1.50:5555`).
-4. Chuyển sang tab **Commands** (biểu tượng dấu nhắc lệnh), dán lệnh sau và bấm **Run**:
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.sh | bash
-   ```
+Nếu bạn không có máy tính, bạn hoàn toàn có thể dùng **Điện thoại Android** hoặc **iPhone/iPad** để chạy lệnh cài đặt trực tiếp qua Wi-Fi.
+
+👉 **[Xem tài liệu hướng dẫn chi tiết từng bước cho Android & iPhone tại đây (GUIDE-MOBILE.md)](GUIDE-MOBILE.md)**
 
 ---
 
