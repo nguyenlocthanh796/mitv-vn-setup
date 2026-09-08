@@ -162,6 +162,10 @@ if ($Restore) {
     Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
     Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
     Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+    Run-AdbShell "pm enable com.miui.systemAdSolution" | Out-Null
+    Run-AdbShell "pm enable com.xiaomi.mitv.advertise" | Out-Null
+    Run-AdbShell "pm enable com.miui.tv.analytics" | Out-Null
+    Run-AdbShell "pm enable com.xiaomi.mibox.gamecenter" | Out-Null
     Run-AdbShell "am start -n com.mitv.tvhome/.MainActivity" | Out-Null
     Write-Host "[OK] Da khoi phuc xong! Tivi tro ve nguyen ban nha san xuat." -ForegroundColor Green
     exit 0
@@ -178,6 +182,18 @@ Write-Info "Model: $($model.Trim()) | Android: $($androidVer.Trim()) | CPU: $($a
 Run-AdbShell "settings put global window_animation_scale 0.5" | Out-Null
 Run-AdbShell "settings put global transition_animation_scale 0.5" | Out-Null
 Run-AdbShell "settings put global animator_duration_scale 0.5" | Out-Null
+
+Write-Step "Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi..."
+Run-AdbShell "settings put global ntp_server time.android.com" | Out-Null
+Run-AdbShell "settings put global auto_time 1" | Out-Null
+Run-AdbShell "setprop persist.sys.timezone Asia/Ho_Chi_Minh" | Out-Null
+Run-AdbShell "service call alarm 3 s16 Asia/Ho_Chi_Minh" | Out-Null
+
+Run-AdbShell "pm disable-user --user 0 com.miui.systemAdSolution" | Out-Null
+Run-AdbShell "pm disable-user --user 0 com.xiaomi.mitv.advertise" | Out-Null
+Run-AdbShell "pm disable-user --user 0 com.miui.tv.analytics" | Out-Null
+Run-AdbShell "pm disable-user --user 0 com.xiaomi.mibox.gamecenter" | Out-Null
+Write-Info "Da dat may chu gio GMT+7 (time.android.com) va tat quang cao Xiaomi."
 
 # 4. Cai dat Launcher neu chua co
 $launcherInstalled = (Run-AdbShell "pm list packages com.spocky.projengmenu") -match "com.spocky.projengmenu"
@@ -262,6 +278,10 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
             Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
             Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+            Run-AdbShell "pm enable com.miui.systemAdSolution" | Out-Null
+            Run-AdbShell "pm enable com.xiaomi.mitv.advertise" | Out-Null
+            Run-AdbShell "pm enable com.miui.tv.analytics" | Out-Null
+            Run-AdbShell "pm enable com.xiaomi.mibox.gamecenter" | Out-Null
             Run-AdbShell "am start -n com.mitv.tvhome/.MainActivity" | Out-Null
             Write-Host "[OK] Da khoi phuc xong! Tivi tro ve nguyen ban nha san xuat." -ForegroundColor Green
             exit 0

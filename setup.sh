@@ -117,6 +117,10 @@ if [ "$CLI_RESTORE" -eq 1 ]; then
     adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
     adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
     adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell pm enable com.miui.systemAdSolution 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mibox.gamecenter 2>/dev/null || true
     adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
     echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
     exit 0
@@ -127,6 +131,17 @@ adb -s "$TARGET_DEV" shell input keyevent KEYCODE_WAKEUP 2>/dev/null || true
 adb -s "$TARGET_DEV" shell settings put global window_animation_scale 0.5 2>/dev/null || true
 adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 0.5 2>/dev/null || true
 adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 0.5 2>/dev/null || true
+
+echo -e "\n${GREEN}[+] Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi...${NC}"
+adb -s "$TARGET_DEV" shell settings put global ntp_server time.android.com 2>/dev/null || true
+adb -s "$TARGET_DEV" shell settings put global auto_time 1 2>/dev/null || true
+adb -s "$TARGET_DEV" shell setprop persist.sys.timezone "Asia/Ho_Chi_Minh" 2>/dev/null || true
+adb -s "$TARGET_DEV" shell service call alarm 3 s16 "Asia/Ho_Chi_Minh" 2>/dev/null || true
+
+adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.miui.systemAdSolution 2>/dev/null || true
+adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.xiaomi.mitv.advertise 2>/dev/null || true
+adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.miui.tv.analytics 2>/dev/null || true
+adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.xiaomi.mibox.gamecenter 2>/dev/null || true
 
 # Kiem tra launcher
 if ! adb -s "$TARGET_DEV" shell pm list packages com.spocky.projengmenu 2>/dev/null | grep -q "com.spocky.projengmenu"; then
@@ -205,6 +220,10 @@ else
         adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
         adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
         adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell pm enable com.miui.systemAdSolution 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mibox.gamecenter 2>/dev/null || true
         adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
         echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
         exit 0
