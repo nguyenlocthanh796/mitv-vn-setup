@@ -170,8 +170,8 @@ Bạn chỉ cần vào <code>Cài đặt</code> của TV và chọn <code>Khôi 
 
 ---
 
-## 🤝 Đóng góp & Bản quyền
+## ⚖️ Giấy phép & Tác quyền (License)
 
-Dự án phát triển hoàn toàn vì mục đích phi thương mại hỗ trợ cộng đồng người dùng Xiaomi tại Việt Nam. Mọi đóng góp (Pull Request / Issue) đều được chào đón!
-
-Phát hành theo giấy phép [MIT License](LICENSE).
+* **Tác giả & Quản trị dự án**: **Nguyễn Lộc Thành** ([@nguyenlocthanh796](https://github.com/nguyenlocthanh796))
+* **Giấy phép mã nguồn**: Phát hành theo chuẩn mã nguồn mở [MIT License](LICENSE).
+* Bạn có toàn quyền sử dụng, sao chép, tùy biến và phân phối miễn phí cho cộng đồng. Giữ nguyên thông tin tác quyền tác giả khi phân phối lại.
