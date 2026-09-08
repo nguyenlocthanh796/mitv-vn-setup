@@ -50,7 +50,11 @@ Người dùng Android có 2 lựa chọn:
 4. **CỰC KỲ QUAN TRỌNG - Nhìn lên màn hình Tivi**:
    - Tivi sẽ hiện lên bảng hỏi: *"Cho phép gỡ lỗi USB từ thiết bị này?"*.
    - Dùng remote di chuyển xuống tích vào ô: **Luôn cho phép từ máy tính này (Always allow)** rồi bấm **OK**.
-5. Điện thoại sẽ tự động chạy toàn bộ quy trình: đổi giao diện Projectivy, khóa phím Home và cài trọn bộ ứng dụng.
+5. **Chọn chế độ cài đặt (Tự động chọn [1] sau 10 giây nếu không bấm gì)**:
+   - Bấm **1** (hoặc để yên): Cài **ĐẦY ĐỦ 16 app** (Khuyên dùng cho tivi gia đình).
+   - Bấm **2**: Cài **CƠ BẢN 5 app nhẹ** (Dành riêng cho tivi cấu hình thấp, RAM 1GB như EA32, EA40, 4A để máy nhẹ mượt tối đa).
+   - Bấm **3**: **TỰ CHỌN** theo số thứ tự (Ví dụ gõ `1 3 5 7` rồi nhấn Enter).
+6. Điện thoại sẽ tự động chạy toàn bộ quy trình: đổi giao diện Projectivy, khóa phím Home và nạp các ứng dụng đã chọn.
 
 ---
 

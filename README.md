@@ -45,6 +45,7 @@ Tivi Xiaomi và Redmi nội địa Trung Quốc có thị phần lớn nhờ c�
 * **Accessibility Interception**: Khóa phím Home phần cứng vào Projectivy Launcher qua `ProjectivyAccessibilityService`, ngăn chặn triệt để PatchWall chiếm quyền hiển thị.
 * **Performance Tuning**: Thiết lập `window_animation_scale`, `transition_animation_scale`, `animator_duration_scale` về `0.5x`, phản hồi giao diện tăng 200%.
 * **Curated App Ecosystem**: Tự động triển khai 16 ứng dụng Leanback UI điều khiển hoàn hảo qua remote D-pad.
+* **3 Chế độ cài đặt linh hoạt (Mobile-Friendly)**: Cho phép chọn Mode [1] Cài Full 16 app, Mode [2] Cài Cơ bản 5 app nhẹ cho TV RAM 1GB (EA32, EA40), hoặc Mode [3] Tự chọn từng app qua số thứ tự.
 
 ---
 

@@ -9,6 +9,7 @@
 [CmdletBinding()]
 param (
     [string]$DeviceIp = "",
+    [string]$Mode = "",
     [switch]$SkipApps = $false,
     [switch]$DebloatOnly = $false
 )
@@ -204,7 +205,68 @@ if (-not $SkipApps) {
         }
     }
 
-    foreach ($app in $appsConfig.apps) {
+    # Menu chon che do cai dat ung dung
+    Write-Host "`n----------------------------------------------------" -ForegroundColor Cyan
+    Write-Host "       CHON CHE DO CAI DAT UNG DUNG" -ForegroundColor Yellow
+    Write-Host "----------------------------------------------------" -ForegroundColor Cyan
+    Write-Host "  [1] Cai DAY DU (16 app truyen hinh, phim, Youtube)" -ForegroundColor Green
+    Write-Host "  [2] Cai CO BAN (5 app nhe cho TV RAM 1GB)" -ForegroundColor Green
+    Write-Host "  [3] TU CHON ung dung theo so thu tu" -ForegroundColor Green
+    Write-Host "----------------------------------------------------" -ForegroundColor Cyan
+
+    $selectedMode = "1"
+    if ($Mode) {
+        $selectedMode = $Mode
+        Write-Info "Che do duoc chi dinh: $selectedMode"
+    } else {
+        Write-Host "Tu dong chon [1] sau 10 giay neu khong nhap..." -ForegroundColor Yellow
+        $timeout = 10
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        $inputVal = ""
+        while ($stopwatch.Elapsed.TotalSeconds -lt $timeout) {
+            if ([Console]::KeyAvailable) {
+                $inputVal = Read-Host "Chon che do [1/2/3] (Mac dinh 1)"
+                break
+            }
+            Start-Sleep -Milliseconds 200
+        }
+        if ($inputVal) {
+            $selectedMode = $inputVal.Trim()
+        } else {
+            Write-Host "[*] Het thoi gian cho. Tu dong chon Che do 1 (Day du)." -ForegroundColor Green
+            $selectedMode = "1"
+        }
+    }
+
+    $targetApps = @()
+    if ($selectedMode -eq "2" -or $selectedMode -eq "basic") {
+        Write-Info "Che do 2: Cai dat 5 ung dung thiet yeu cho TV RAM 1GB..."
+        $targetApps = $appsConfig.apps | Where-Object { $_.id -in @("smarttube", "vtvgo", "tv360", "sftv") }
+    } elseif ($selectedMode -eq "3" -or $selectedMode -eq "custom") {
+        Write-Host "`n--- DANH SACH UNG DUNG (1-$($appsConfig.apps.Count)) ---" -ForegroundColor Cyan
+        for ($i = 0; $i -lt $appsConfig.apps.Count; $i++) {
+            $curr = $appsConfig.apps[$i]
+            Write-Host ("  [{0,2}] {1} ({2})" -f ($i + 1), $curr.name, $curr.category)
+        }
+        Write-Host "---------------------------------" -ForegroundColor Cyan
+        $choices = Read-Host "Nhap so cac app muon cai (VD: 1 3 5 hoac 1,2,5)"
+        $choiceNums = ($choices -replace ',', ' ').Split(' ') | Where-Object { $_ -match '^\d+$' } | ForEach-Object { [int]$_ }
+        $targetApps = @()
+        foreach ($n in $choiceNums) {
+            if ($n -ge 1 -and $n -le $appsConfig.apps.Count) {
+                $targetApps += $appsConfig.apps[$n - 1]
+            }
+        }
+        if ($targetApps.Count -eq 0) {
+            Write-Warn "Khong co app nao hop le duoc chon. Se cai Che do 1 (Day du)..."
+            $targetApps = $appsConfig.apps
+        }
+    } else {
+        Write-Info "Che do 1: Cai dat tron bo tat ca ung dung..."
+        $targetApps = $appsConfig.apps
+    }
+
+    foreach ($app in $targetApps) {
         Write-Host "`n  --> Ung dung: $($app.name)" -ForegroundColor Yellow
         $installed = (Run-AdbShell "pm list packages $($app.package)") -match $app.package
         if ($installed) {

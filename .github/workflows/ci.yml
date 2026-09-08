@@ -16,7 +16,7 @@ jobs:
 
       - name: Validate JSON syntax
         run: |
-          python3 -c "import json; json.load(open('apps.json'))"
+          python3 -c "import json; json.load(open('apps.json', encoding='utf-8'))"
           echo "apps.json is valid JSON."
 
   shellcheck:
