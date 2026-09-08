@@ -108,29 +108,53 @@ Bật **ADB Debugging (Gỡ lỗi USB)** trên Tivi:
 | | **RS File Manager** | Quản lý bộ nhớ, giải nén zip trực tiếp trên TV |
 | | **Speedtest TV** | Đo tốc độ mạng Wi-Fi / LAN của tivi |
 
+## 📺 Các dòng Tivi Xiaomi & Redmi được hỗ trợ (Compatibility)
+
+Công cụ hỗ trợ **100% các dòng Tivi Xiaomi, Redmi và Mi Box nội địa Trung Quốc** chạy Android 7.0 đến Android 13+:
+
+| Dòng sản phẩm | Các Model hỗ trợ chi tiết |
+| :--- | :--- |
+| **Xiaomi TV EA Series** | EA32, EA40, EA43, EA50, EA55, EA65, EA70, EA75 (Đời 2022, 2023, 2024, 2025) |
+| **Xiaomi TV A / A Pro Series** | A32, A43, A50, A55, A65, A70, A75, A85 (Bản nội địa & quốc tế) |
+| **Redmi TV Series** | Redmi X50, X55, X65, X75, X85, XT Series |
+| **Redmi MAX Màn hình lớn** | Redmi MAX 85 inch, MAX 86 inch, MAX 98 inch, MAX 100 inch |
+| **Xiaomi TV S / Master Series** | S55, S65, S75, S85 (144Hz), Mi TV Master OLED |
+| **Mi TV Series cũ & Box** | Mi TV 4A, 4C, 4S, 4X, Mi TV 5 / 5 Pro, Mi Box 3, Mi Box 4, Mi Box 4S Pro |
+
 ---
 
 ## ❓ Câu hỏi thường gặp (FAQ)
 
 <details>
-<summary><b>1. Bấm phím Home có bị văng về giao diện tiếng Trung không?</b></summary>
-Không. Script tự động cấp quyền <code>Accessibility Service</code> cho Projectivy Launcher. Bất cứ khi nào phím Home được nhấn, hệ thống sẽ ưu tiên giữ nguyên giao diện Projectivy Launcher.
+<summary><b>1. Bấm phím Home có bị văng về giao diện tiếng Trung PatchWall không?</b></summary>
+<b>Hoàn toàn không.</b> Script tự động kích hoạt <code>Projectivy Accessibility Service</code>. Khi bạn bấm phím Home trên điều khiển, hệ thống sẽ ưu tiên giữ nguyên giao diện Projectivy Launcher, chặn hoàn toàn việc chuyển về PatchWall.
 </details>
 
 <details>
-<summary><b>2. Tivi có bị mất bảo hành hay treo logo không?</b></summary>
-Hoàn toàn không. Công cụ chỉ sử dụng các lệnh cấp quyền và cài đặt APK chính thống qua ADB của Google, không sửa đổi Kernel hay Bootloader.
+<summary><b>2. Tivi không có Google Play (CH Play) thì cài và cập nhật app thế nào?</b></summary>
+Script đã tích hợp sẵn cơ chế cài đặt APK chính thống qua ADB. Ngoài ra, tivi đã được cài sẵn app <b>Send Files to TV</b> và trình duyệt <b>TV Bro</b> để bạn tự tải và cài thêm file APK bất kỳ trực tiếp từ điện thoại hoặc internet về sau.
 </details>
 
 <details>
-<summary><b>3. Muốn khôi phục lại như cũ thì làm sao?</b></summary>
-Bạn chỉ cần vào <code>Cài đặt</code> của TV và chọn <code>Khôi phục cài đặt gốc (Factory Reset)</code> là tivi sẽ trở về nguyên trạng ban đầu.
+<summary><b>3. Tivi có bị mất bảo hành hay treo logo (brick) không?</b></summary>
+<b>An toàn 100%.</b> Công cụ chỉ gửi các lệnh cài ứng dụng và tinh chỉnh hoạt ảnh qua giao thức ADB chính thống của Google. Không can thiệp phân vùng hệ thống, không chỉnh sửa Kernel, không Unlock Bootloader, tivi vẫn nhận cập nhật OTA từ Xiaomi bình thường.
+</details>
+
+<details>
+<summary><b>4. Tìm kiếm giọng nói tiếng Việt trên remote có hoạt động không?</b></summary>
+Có. Các ứng dụng như <b>SmartTube</b> và <b>YouTube TV</b> đều tích hợp sẵn bộ nhận diện giọng nói tiếng Việt qua micro trên điều khiển tivi.
+</details>
+
+<details>
+<summary><b>5. Muốn khôi phục lại như lúc mới mua thì làm sao?</b></summary>
+Bạn chỉ cần vào <code>Cài đặt</code> của TV và chọn <code>Khôi phục cài đặt gốc (Factory Reset)</code> là tivi sẽ xóa toàn bộ app và trở về nguyên trạng xuất xưởng.
 </details>
 
 ---
 
 ## 🤝 Đóng góp & Bản quyền
 
-Dự án phát triển hoàn toàn vì mục đích phi thương mại hỗ trợ cộng đồng người dùng Xiaomi tại Việt Nam.
+Dự án phát triển hoàn toàn vì mục đích phi thương mại hỗ trợ cộng đồng người dùng Xiaomi tại Việt Nam. Mọi đóng góp (Pull Request / Issue) đều được chào đón!
 
 Phát hành theo giấy phép [MIT License](LICENSE).
+
