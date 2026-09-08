@@ -16,6 +16,8 @@ CACHE_DIR="$SCRIPT_DIR/.cache"
 mkdir -p "$CACHE_DIR"
 
 CLI_UPDATE_TARGET=""
+CLI_RESTORE=0
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --update|-u)
@@ -24,6 +26,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --update-all)
             CLI_UPDATE_TARGET="all"
+            shift 1
+            ;;
+        --restore)
+            CLI_RESTORE=1
             shift 1
             ;;
         *)
@@ -37,14 +43,20 @@ echo -e "${CYAN}     MiTV Vietnam Toolkit - Setup & App Manager     ${NC}"
 echo -e "${CYAN}====================================================${NC}"
 
 if ! command -v adb &> /dev/null; then
-    echo -e "${RED}[X] Chua cai dat adb. Vui long cai android-platform-tools!${NC}"
+    echo -e "${RED}[X] Chua cai dat adb. Vui long cai dat android-tools!${NC}"
+    echo -e "    * Termux (Android): pkg install android-tools"
+    echo -e "    * macOS: brew install android-platform-tools"
+    echo -e "    * Ubuntu/Debian: sudo apt install adb"
     exit 1
 fi
 
 adb start-server > /dev/null 2>&1
 
 DEVICES=$(adb devices | grep -E '\s+device$' | awk '{print $1}')
-DEV_COUNT=$(echo "$DEVICES" | grep -v '^$' | wc -l)
+DEV_COUNT=0
+if [ -n "$DEVICES" ]; then
+    DEV_COUNT=$(echo "$DEVICES" | grep -c '[^[:space:]]' || true)
+fi
 
 if [ "$DEV_COUNT" -eq 1 ]; then
     TARGET_DEV="$DEVICES"
@@ -54,15 +66,67 @@ elif [ "$DEV_COUNT" -gt 1 ]; then
     echo "$DEVICES"
     read -r -p "Chon thiet bi: " TARGET_DEV
 else
-    read -r -p "Nhap dia chi IP Tivi Xiaomi (VD: 192.168.1.50:5555): " TARGET_DEV
-    adb connect "$TARGET_DEV"
+    read -r -p "Nhap dia chi IP Tivi Xiaomi (VD: 192.168.1.50): " RAW_IP
+    if [ -z "$RAW_IP" ]; then
+        echo -e "${RED}[X] Chua nhap IP. Thoat.${NC}"
+        exit 1
+    fi
+    # Chuan hoa dia chi IP cho nguoi moi (loai bo http:// va khoang trang)
+    CLEAN_IP=$(echo "$RAW_IP" | sed -e 's|^https*://||' -e 's|/.*$||' | tr -d '[:space:]')
+    if [[ "$CLEAN_IP" != *:* ]]; then
+        TARGET_DEV="${CLEAN_IP}:5555"
+    else
+        TARGET_DEV="$CLEAN_IP"
+    fi
+    echo -e "${CYAN}[*] Dang ket noi toi $TARGET_DEV...${NC}"
+    adb connect "$TARGET_DEV" >/dev/null 2>&1 || true
+
+    # Kiem tra xac nhan tren man hinh Tivi
+    IS_READY=0
+    for i in {1..10}; do
+        DEV_STATUS=$(adb devices | grep "$TARGET_DEV" | awk '{print $2}' || true)
+        if [ "$DEV_STATUS" = "device" ]; then
+            IS_READY=1
+            break
+        elif [ "$DEV_STATUS" = "unauthorized" ]; then
+            echo -e "${YELLOW}[!] TIVI DANG CHO XAC NHAN!${NC}"
+            echo -e "${YELLOW}    >> NHIN LEN MAN HINH TIVI: Bam 'Luon cho phep' bang remote! (Lan $i/10)${NC}"
+            sleep 2
+        else
+            sleep 1
+        fi
+    done
+
+    if [ "$IS_READY" -eq 0 ]; then
+        echo -e "\n${RED}====================================================${NC}"
+        echo -e "${RED}[X] KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!   ${NC}"
+        echo -e "${RED}====================================================${NC}"
+        echo -e "Huong dan xu ly nhanh:"
+        echo -e "  1. Tivi va dien thoai phai bat CUNG 1 mang Wi-Fi."
+        echo -e "  2. Kiem tra da bat 'ADB debugging' trong Cai dat nha phat trien."
+        echo -e "  3. Neu man hinh Tivi hien hop thoai, hay bam 'Luon cho phep'."
+        exit 1
+    fi
+fi
+
+# Xu ly lenh khoi phuc ve goc
+if [ "$CLI_RESTORE" -eq 1 ]; then
+    echo -e "\n${YELLOW}[*] Dang khoi phuc ve giao dien PatchWall goc...${NC}"
+    adb -s "$TARGET_DEV" shell cmd package set-home-activity com.mitv.tvhome/.MainActivity 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put secure enabled_accessibility_services '""' 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
+    echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
+    exit 0
 fi
 
 echo -e "\n${GREEN}[+] Danh thuc va toi uu toc do he thong...${NC}"
 adb -s "$TARGET_DEV" shell input keyevent KEYCODE_WAKEUP 2>/dev/null || true
-adb -s "$TARGET_DEV" shell settings put global window_animation_scale 0.5
-adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 0.5
-adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 0.5
+adb -s "$TARGET_DEV" shell settings put global window_animation_scale 0.5 2>/dev/null || true
+adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 0.5 2>/dev/null || true
+adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 0.5 2>/dev/null || true
 
 # Kiem tra launcher
 if ! adb -s "$TARGET_DEV" shell pm list packages com.spocky.projengmenu 2>/dev/null | grep -q "com.spocky.projengmenu"; then
@@ -77,7 +141,7 @@ if ! adb -s "$TARGET_DEV" shell pm list packages com.spocky.projengmenu 2>/dev/n
     adb -s "$TARGET_DEV" shell settings put secure accessibility_enabled 1 2>/dev/null || true
 fi
 
-# Load danh muc ung dung
+# Danh muc ung dung
 APPS_LIST=(
     "smarttube:SmartTube:org.smarttube.stable:smarttube.apk:https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/smarttube.apk"
     "youtubetv:YouTube for TV:com.google.android.youtube.tv:com.google.android.youtube.tv.xapk:https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/com.google.android.youtube.tv.xapk"
@@ -112,9 +176,7 @@ if [ -n "$CLI_UPDATE_TARGET" ]; then
         done
     fi
 else
-    # -------------------------------------------------------------
-    # MENU CHỌN CHẾ ĐỘ CÀI ĐẶT / NÂNG CẤP
-    # -------------------------------------------------------------
+    # Menu chon che do cai dat / nang cap
     echo -e "\n${CYAN}----------------------------------------------------${NC}"
     echo -e "${YELLOW}       CHON CHE DO CAI DAT UNG DUNG                 ${NC}"
     echo -e "${CYAN}----------------------------------------------------${NC}"
@@ -122,11 +184,12 @@ else
     echo -e "  ${GREEN}[2]${NC} Cai CO BAN (5 app nhe cho TV RAM 1GB)"
     echo -e "  ${GREEN}[3]${NC} TU CHON ung dung theo so thu tu"
     echo -e "  ${GREEN}[4]${NC} CAP NHAT / NANG CAP ung dung (giu nguyen data)"
+    echo -e "  ${YELLOW}[5]${NC} KHOI PHUC giao dien PatchWall goc nha san xuat"
     echo -e "${CYAN}----------------------------------------------------${NC}"
 
     SELECTED_MODE="1"
     echo -e "${YELLOW}Tu dong chon [1] sau 10 giay neu khong nhap...${NC}"
-    if read -t 10 -r -p "Chon che do [1/2/3/4] (Mac dinh 1): " USER_INPUT; then
+    if read -t 10 -r -p "Chon che do [1/2/3/4/5] (Mac dinh 1): " USER_INPUT; then
         if [ -n "$USER_INPUT" ]; then
             SELECTED_MODE="$USER_INPUT"
         fi
@@ -135,7 +198,17 @@ else
         SELECTED_MODE="1"
     fi
 
-    if [ "$SELECTED_MODE" = "2" ]; then
+    if [ "$SELECTED_MODE" = "5" ]; then
+        echo -e "\n${YELLOW}[*] Dang khoi phuc ve giao dien PatchWall goc...${NC}"
+        adb -s "$TARGET_DEV" shell cmd package set-home-activity com.mitv.tvhome/.MainActivity 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put secure enabled_accessibility_services '""' 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
+        echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
+        exit 0
+    elif [ "$SELECTED_MODE" = "2" ]; then
         echo -e "\n${CYAN}[*] Che do 2: Cai dat 5 ung dung thiet yeu cho TV RAM 1GB...${NC}"
         for item in "${APPS_LIST[@]}"; do
             app_id=$(echo "$item" | cut -d: -f1)
@@ -200,7 +273,6 @@ for item in "${INSTALL_TARGETS[@]}"; do
 
     echo -e "\n  ${YELLOW}--> $app_name ($app_pkg)${NC}"
     
-    # Kiem tra da co tren TV chua
     APP_EXISTS=$(adb -s "$TARGET_DEV" shell pm list packages "$app_pkg" 2>/dev/null | grep -c "$app_pkg" || true)
     
     if [ "$APP_EXISTS" -gt 0 ] && [ "$IS_UPGRADE_MODE" -eq 0 ]; then
@@ -216,7 +288,6 @@ for item in "${INSTALL_TARGETS[@]}"; do
 
     TARGET_FILE="$CACHE_DIR/$asset_name"
 
-    # Neu che do nang cap, luon tai ban moi nhat
     if [ "$IS_UPGRADE_MODE" -eq 1 ]; then
         rm -f "$TARGET_FILE"
     fi

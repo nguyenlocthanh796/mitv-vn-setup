@@ -18,6 +18,27 @@
 
 ---
 
+## ⚡ Bắt đầu nhanh trong 3 bước (Dành cho người mới)
+
+> [!TIP]
+> **Không cần am hiểu kỹ thuật! Chỉ mất đúng 60 giây:**
+> 
+> 1. **Chuẩn bị trên Tivi**: Vào **Cài đặt (Settings)** ➔ **Giới thiệu (About)** ➔ Bấm phím **OK** trên remote 5 lần vào dòng **Model/Phiên bản** cho đến khi hiện thông báo Nhà phát triển. Vào **Tùy chọn nhà phát triển** bật **Gỡ lỗi USB (ADB Debugging)**. Xem địa chỉ IP tại mục **Mạng** (Ví dụ: `192.168.1.50`).
+> 2. **Chạy lệnh kết nối**:
+>    * **Bằng Điện thoại Android**: Mở app **Termux** (tải trên Google Play/F-Droid) dán lệnh:
+>      ```bash
+>      pkg update -y && pkg install android-tools curl -y && curl -fsSL https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.sh | bash
+>      ```
+>    * **Bằng Máy tính Windows**: Bấm chuột phải nút Start ➔ Mở **PowerShell** ➔ Dán lệnh:
+>      ```powershell
+>      irm https://raw.githubusercontent.com/nguyenlocthanh796/mitv-vn-setup/main/setup.ps1 | iex
+>      ```
+> 3. **Nhìn lên màn hình Tivi**: Khi hiện thông báo *"Cho phép gỡ lỗi USB?"*, dùng remote tích chọn **"Luôn cho phép"** rồi bấm **OK**. Tool sẽ tự động làm toàn bộ mọi việc!
+> 
+> *(Nếu muốn khôi phục về Tivi gốc xuất xưởng bất kỳ lúc nào: Chỉ cần chạy lại script và chọn số `[5]`)*
+
+---
+
 ## 📑 Mục lục
 
 - [1. Động lực phát triển & Giải pháp kỹ thuật](#1-động-lực-phát-triển--giải-pháp-kỹ-thuật)

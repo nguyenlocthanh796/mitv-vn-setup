@@ -12,6 +12,7 @@ param (
     [string]$Mode = "",
     [string]$Update = "",
     [switch]$UpdateAll = $false,
+    [switch]$Restore = $false,
     [switch]$SkipApps = $false,
     [switch]$DebloatOnly = $false
 )
@@ -91,7 +92,8 @@ Write-Step "Ket noi toi Tivi Xiaomi..."
 
 $targetDevice = ""
 if ($DeviceIp) {
-    $targetDevice = if ($DeviceIp -match ":5555$") { $DeviceIp } else { "$DeviceIp`:5555" }
+    $cleanIp = $DeviceIp.Trim() -replace '^https?://', '' -replace '/.*$', ''
+    $targetDevice = if ($cleanIp -match ':\d+$') { $cleanIp } else { "$cleanIp`:5555" }
     Write-Info "Ket noi toi IP chi dinh: $targetDevice"
     & $Adb connect $targetDevice | Out-Null
 } else {
@@ -114,9 +116,37 @@ if ($DeviceIp) {
 if (-not $targetDevice) {
     $inputIp = Read-Host "Nhap dia chi IP cua Tivi Xiaomi (VD: 192.168.1.50)"
     if (-not $inputIp) { throw "Chua nhap IP. Huy tien trinh." }
-    $targetDevice = if ($inputIp -match ":5555$") { $inputIp } else { "$inputIp`:5555" }
+    $cleanIp = $inputIp.Trim() -replace '^https?://', '' -replace '/.*$', ''
+    $targetDevice = if ($cleanIp -match ':\d+$') { $cleanIp } else { "$cleanIp`:5555" }
     Write-Info "Dang ket noi toi $targetDevice..."
     & $Adb connect $targetDevice | Out-Null
+
+    # Kiem tra xac nhan tren man hinh Tivi
+    $isReady = $false
+    for ($i = 1; $i -le 10; $i++) {
+        $devLine = (& $Adb devices) | Where-Object { $_ -match [regex]::Escape($targetDevice) }
+        if ($devLine -match "\s+device$") {
+            $isReady = $true
+            break
+        } elseif ($devLine -match "\s+unauthorized$") {
+            Write-Warn "TIVI DANG CHO XAC NHAN!"
+            Write-Host "    >> NHIN LEN MAN HINH TIVI: Tich 'Luon cho phep' va bam OK bang remote! ($i/10)" -ForegroundColor Yellow
+            Start-Sleep -Seconds 2
+        } else {
+            Start-Sleep -Seconds 1
+        }
+    }
+
+    if (-not $isReady) {
+        Write-Err "KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!"
+        Write-Host @"
+Huong dan xu ly:
+  1. Dam bao Tivi va May tinh ket noi CUNG 1 ten Wi-Fi.
+  2. Kiem tra da bat 'Go loi USB (ADB Debugging)' trong Cai dat nha phat trien.
+  3. Neu Tivi hien hop thoai xac nhan, hay dung remote bam 'Luon cho phep'.
+"@ -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 function Run-AdbShell {
@@ -124,13 +154,26 @@ function Run-AdbShell {
     return (& $Adb -s $targetDevice shell $Cmd)
 }
 
+# Xu ly lenh khoi phuc ve goc neu co tham so -Restore
+if ($Restore) {
+    Write-Host "`n[*] Dang khoi phuc ve giao dien PatchWall goc..." -ForegroundColor Yellow
+    Run-AdbShell "cmd package set-home-activity com.mitv.tvhome/.MainActivity" | Out-Null
+    Run-AdbShell "settings put secure enabled_accessibility_services '""""'" | Out-Null
+    Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
+    Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
+    Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+    Run-AdbShell "am start -n com.mitv.tvhome/.MainActivity" | Out-Null
+    Write-Host "[OK] Da khoi phuc xong! Tivi tro ve nguyen ban nha san xuat." -ForegroundColor Green
+    exit 0
+}
+
 # 3. Kiem tra thong tin Tivi & Toi uu hoat anh
 Write-Step "Danh thuc va toi uu toc do he thong..."
 Run-AdbShell "input keyevent KEYCODE_WAKEUP" | Out-Null
-$abi = (Run-AdbShell "getprop ro.product.cpu.abi").Trim()
-$model = (Run-AdbShell "getprop ro.product.model").Trim()
-$androidVer = (Run-AdbShell "getprop ro.build.version.release").Trim()
-Write-Info "Model: $model | Android: $androidVer | CPU: $abi"
+$abi = (Run-AdbShell "getprop ro.product.cpu.abi")
+$model = (Run-AdbShell "getprop ro.product.model")
+$androidVer = (Run-AdbShell "getprop ro.build.version.release")
+Write-Info "Model: $($model.Trim()) | Android: $($androidVer.Trim()) | CPU: $($abi.Trim())"
 
 Run-AdbShell "settings put global window_animation_scale 0.5" | Out-Null
 Run-AdbShell "settings put global transition_animation_scale 0.5" | Out-Null
@@ -186,6 +229,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
         Write-Host "  [2] Cai CO BAN (5 app nhe cho TV RAM 1GB)" -ForegroundColor Green
         Write-Host "  [3] TU CHON ung dung theo so thu tu" -ForegroundColor Green
         Write-Host "  [4] CAP NHAT / NANG CAP ung dung (giu nguyen data)" -ForegroundColor Green
+        Write-Host "  [5] KHOI PHUC giao dien PatchWall goc nha san xuat" -ForegroundColor Yellow
         Write-Host "----------------------------------------------------" -ForegroundColor Cyan
 
         $selectedMode = "1"
@@ -198,7 +242,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             $inputVal = ""
             while ($stopwatch.Elapsed.TotalSeconds -lt $timeout) {
                 if ([Console]::KeyAvailable) {
-                    $inputVal = Read-Host "Chon che do [1/2/3/4] (Mac dinh 1)"
+                    $inputVal = Read-Host "Chon che do [1/2/3/4/5] (Mac dinh 1)"
                     break
                 }
                 Start-Sleep -Milliseconds 200
@@ -211,7 +255,17 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             }
         }
 
-        if ($selectedMode -eq "2" -or $selectedMode -eq "basic") {
+        if ($selectedMode -eq "5" -or $selectedMode -eq "restore") {
+            Write-Host "`n[*] Dang khoi phuc ve giao dien PatchWall goc..." -ForegroundColor Yellow
+            Run-AdbShell "cmd package set-home-activity com.mitv.tvhome/.MainActivity" | Out-Null
+            Run-AdbShell "settings put secure enabled_accessibility_services '""""'" | Out-Null
+            Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
+            Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
+            Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+            Run-AdbShell "am start -n com.mitv.tvhome/.MainActivity" | Out-Null
+            Write-Host "[OK] Da khoi phuc xong! Tivi tro ve nguyen ban nha san xuat." -ForegroundColor Green
+            exit 0
+        } elseif ($selectedMode -eq "2" -or $selectedMode -eq "basic") {
             Write-Info "Che do 2: Cai dat 5 ung dung thiet yeu cho TV RAM 1GB..."
             $targetApps = $appsConfig.apps | Where-Object { $_.id -in @("smarttube", "vtvgo", "tv360", "sftv") }
         } elseif ($selectedMode -eq "3" -or $selectedMode -eq "custom") {
