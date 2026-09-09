@@ -57,6 +57,7 @@
 - [9. Bộ tài liệu kỹ thuật & Tiêu chuẩn phát triển](#9-bộ-tài-liệu-kỹ-thuật--tiêu-chuẩn-phát-triển)
 - [10. Các câu hỏi thường gặp (FAQ)](#10-các-câu-hỏi-thường-gặp-faq)
 - [11. Giấy phép & Tác quyền (License)](#11-giấy-phép--tác-quyền-license)
+- [12. Tuyên bố pháp lý & Bản quyền (Legal Disclaimer & DMCA)](#12-tuyên-bố-pháp-lý--bản-quyền-legal-disclaimer--dmca)
 
 ---
 
@@ -332,3 +333,17 @@ Thực hiện thao tác <code>Khôi phục cài đặt gốc (Factory Reset)</co
 * **Tác giả & Quản trị dự án**: **Nguyễn Lộc Thành** ([@nguyenlocthanh796](https://github.com/nguyenlocthanh796))
 * **Giấy phép mã nguồn**: Phát hành theo chuẩn mã nguồn mở [MIT License](LICENSE).
 * Mã nguồn được cung cấp hoàn toàn miễn phí nhằm hỗ trợ cộng đồng người dùng Tivi Xiaomi tại Việt Nam. Mọi hoạt động sao chép, đóng gói lại hoặc phân phối tiếp vui lòng giữ nguyên ghi nhận tác quyền ban đầu.
+
+---
+
+## 12. Tuyên bố pháp lý & Bản quyền (Legal Disclaimer & DMCA)
+
+> [!NOTE]
+> **Tuyên bố trách nhiệm & Mục đích phi thương mại:**
+> 1. **Mục đích phi thương mại & Tương tác thiết bị**: `MiTV Vietnam Toolkit` là dự án mã nguồn mở, hoàn toàn phi lợi nhuận, được phát triển phục vụ mục đích học thuật, nghiên cứu và hỗ trợ cộng đồng cải thiện khả năng tương tác của thiết bị phần cứng (Interoperability & Fair Use) thuộc quyền sở hữu cá nhân hợp pháp của người dùng.
+> 2. **Quyền sở hữu nhãn hiệu & Ứng dụng bên thứ ba**:
+>    - Các nhãn hiệu `Xiaomi`, `Redmi`, `PatchWall`, `MIUI TV` thuộc quyền sở hữu của Tập đoàn Xiaomi (Xiaomi Inc.).
+>    - Tên gọi, logo và gói cài đặt của các ứng dụng truyền hình & giải trí (`TV360`, `VTV Go`, `FPT Play`, `VieON`, `SmartTube`, `Spotify`, `VLC`,...) thuộc quyền sở hữu trí tuệ của các nhà phát triển hoặc đơn vị phát sóng tương ứng (Viettel, VTV, FPT Telecom, DatVietVAC, v.v.).
+> 3. **Cam kết không can thiệp DRM & Không bẻ khóa**: Dự án **tuyệt đối không** cung cấp công cụ bẻ khóa (crack), không vượt tường phí (paywall bypass), không can thiệp luồng mã hóa DRM và không phân phối tài khoản lậu. Toàn bộ các gói cài đặt được lập chỉ mục đều là các bản phân phối miễn phí công khai dành cho thiết bị Android TV.
+> 4. **Chính sách gỡ bỏ bản quyền (DMCA / Content Takedown Policy)**:
+>    - Chúng tôi tôn trọng tuyệt đối quyền sở hữu trí tuệ của mọi đơn vị. Nếu bạn là đại diện pháp lý hoặc chủ sở hữu bản quyền của bất kỳ ứng dụng nào và muốn gỡ bỏ liên kết/gói cài đặt khỏi dự án, vui lòng tạo yêu cầu qua [Takedown Request](https://github.com/nguyenlocthanh796/mitv-vn-setup/issues/new?template=dmca_takedown.yml). Quản trị viên cam kết tiếp nhận và gỡ bỏ tài nguyên liên quan trong vòng **24 - 48 giờ** làm việc.

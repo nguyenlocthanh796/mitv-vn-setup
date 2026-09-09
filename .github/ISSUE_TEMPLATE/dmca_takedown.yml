@@ -1,0 +1,43 @@
+name: "⚖️ Yêu Cầu Bản Quyền / DMCA Takedown"
+description: "Dành cho chủ sở hữu bản quyền hoặc đại diện pháp lý yêu cầu gỡ bỏ liên kết / tài nguyên"
+title: "[DMCA / Takedown Request] <Tên Ứng dụng hoặc Tài sản Trí tuệ>"
+labels: ["legal", "takedown"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thông Báo Tiếp Nhận Yêu Cầu Bản Quyền (DMCA / Rights Holder Notice)
+        `MiTV Vietnam Toolkit` là dự án mã nguồn mở phi thương mại phục vụ cộng đồng. Chúng tôi tôn trọng tuyệt đối quyền sở hữu trí tuệ của bạn và cam kết xử lý, gỡ bỏ mọi tài nguyên vi phạm trong vòng **24 - 48 giờ** sau khi nhận được yêu cầu hợp lệ.
+  - type: input
+    id: rights_holder
+    attributes:
+      label: Chủ sở hữu bản quyền / Đơn vị đại diện pháp lý
+      description: "Tên công ty, tổ chức hoặc cá nhân nắm giữ bản quyền"
+      placeholder: "Ví dụ: Tập đoàn Viễn thông Quân đội Viettel / VTV..."
+    validations:
+      required: true
+  - type: input
+    id: contact_email
+    attributes:
+      label: Email liên hệ chính thức của đại diện bản quyền
+      description: "Email công vụ để xác minh yêu cầu"
+      placeholder: "legal@company.com"
+    validations:
+      required: true
+  - type: textarea
+    id: target_resource
+    attributes:
+      label: Tên ứng dụng / Tài nguyên cụ thể cần gỡ bỏ
+      description: "Liệt kê chính xác tên ứng dụng, package ID hoặc URL tài nguyên cần gỡ bỏ"
+      placeholder: "Ví dụ: Ứng dụng TV360 (com.viettel.tv360.tv)"
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Xác nhận đại diện pháp lý
+      options:
+        - label: "Tôi xác nhận rằng tôi là chủ sở hữu quyền tác giả hoặc được ủy quyền hợp pháp để hành động thay mặt cho chủ sở hữu bản quyền."
+          required: true
+        - label: "Tôi yêu cầu gỡ bỏ liên kết tải và chỉ mục của ứng dụng/tài nguyên nêu trên khỏi dự án."
+          required: true
