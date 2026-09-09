@@ -14,7 +14,8 @@ param (
     [switch]$UpdateAll = $false,
     [switch]$Restore = $false,
     [switch]$SkipApps = $false,
-    [switch]$DebloatOnly = $false
+    [switch]$DebloatOnly = $false,
+    [switch]$DnsOnly = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -140,9 +141,17 @@ $adbFound = Get-Command adb -ErrorAction SilentlyContinue
 
 if (-not $adbFound) {
     $localAdb = Join-Path $BinDir "adb.exe"
-    if (Test-Path $localAdb) {
-        $Adb = $localAdb
-        Write-Info "Su dung ADB tich hop san: $localAdb"
+    $candidatePaths = @(
+        $localAdb,
+        "C:\scrcpy-win64-v4.1\adb.exe",
+        "C:\scrcpy\adb.exe",
+        (Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"),
+        (Join-Path $env:ProgramFiles "scrcpy\adb.exe")
+    )
+    $foundCandidate = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($foundCandidate) {
+        $Adb = $foundCandidate
+        Write-Info "Su dung ADB co san: $foundCandidate"
     } else {
         Write-Info "Dang tai Android Platform Tools ve may..."
         $adbZip = Join-Path $CacheDir "platform-tools.zip"
@@ -247,6 +256,15 @@ function Run-AdbShell {
     return (& $Adb -s $targetDevice shell $Cmd)
 }
 
+# Xu ly lenh kich hoat DNS neu co tham so -DnsOnly
+if ($DnsOnly) {
+    Write-Step "Kich hoat Private DNS chan quang cao (AdGuard)..."
+    Run-AdbShell "settings put global private_dns_mode hostname" | Out-Null
+    Run-AdbShell "settings put global private_dns_specifier dns.adguard-dns.com" | Out-Null
+    Write-Host "[OK] Da kich hoat Private DNS AdGuard (dns.adguard-dns.com) thanh cong!" -ForegroundColor Green
+    exit 0
+}
+
 # Xu ly lenh khoi phuc ve goc neu co tham so -Restore
 if ($Restore) {
     Write-Host "`n[*] Dang khoi phuc ve giao dien PatchWall goc..." -ForegroundColor Yellow
@@ -255,6 +273,8 @@ if ($Restore) {
     Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
     Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
     Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+    Run-AdbShell "settings put global private_dns_mode off" | Out-Null
+    Run-AdbShell "settings delete global private_dns_specifier" | Out-Null
     Run-AdbShell "pm enable com.miui.systemAdSolution" | Out-Null
     Run-AdbShell "pm enable com.xiaomi.mitv.advertise" | Out-Null
     Run-AdbShell "pm enable com.miui.tv.analytics" | Out-Null
@@ -282,6 +302,9 @@ Write-Step "Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi..."
 Run-AdbShell "settings put global ntp_server time.android.com" | Out-Null
 Run-AdbShell "settings put global auto_time 1" | Out-Null
 Run-AdbShell "service call alarm 3 s16 Asia/Ho_Chi_Minh" | Out-Null
+Run-AdbShell "settings put global private_dns_mode hostname" | Out-Null
+Run-AdbShell "settings put global private_dns_specifier dns.adguard-dns.com" | Out-Null
+Write-Info "Da kich hoat Private DNS chan quang cao AdGuard (dns.adguard-dns.com)."
 
 $installedPkgs = Run-AdbShell "pm list packages"
 $bloatPackages = @(
@@ -436,6 +459,8 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             Run-AdbShell "settings put global window_animation_scale 1.0" | Out-Null
             Run-AdbShell "settings put global transition_animation_scale 1.0" | Out-Null
             Run-AdbShell "settings put global animator_duration_scale 1.0" | Out-Null
+            Run-AdbShell "settings put global private_dns_mode off" | Out-Null
+            Run-AdbShell "settings delete global private_dns_specifier" | Out-Null
             Run-AdbShell "pm enable com.miui.systemAdSolution" | Out-Null
             Run-AdbShell "pm enable com.xiaomi.mitv.advertise" | Out-Null
             Run-AdbShell "pm enable com.miui.tv.analytics" | Out-Null

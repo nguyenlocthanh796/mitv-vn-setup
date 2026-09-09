@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-09-09
+
+### Added
+- **Private DNS Ad-Blocking (AdGuard DNS)**:
+  - System-wide ad and telemetry blocking via `private_dns_mode hostname` and `private_dns_specifier dns.adguard-dns.com`.
+  - Dedicated `-DnsOnly` switch in `setup.ps1` and `--dns-only` in `setup.sh` for fast standalone configuration.
+  - Automatic restoration to default DNS mode when running with `-Restore` / `--restore`.
+- **Local ADB Candidate Path Detection**:
+  - Automatically detect and reuse existing local ADB binaries (including `C:\scrcpy-win64-v4.1\adb.exe`, `C:\scrcpy\adb.exe`, and Android SDK paths) before attempting network downloads.
+  - Argument pass-through in `setup.bat`.
+
 ## [1.0.0] - 2026-09-08
 
 ### Added

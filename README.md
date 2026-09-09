@@ -50,6 +50,7 @@
 - [4. Hướng dẫn cài đặt bằng Máy tính (Windows, macOS, Linux)](#4-hướng-dẫn-cài-đặt-bằng-máy-tính-windows-macos-linux)
   - [4.1. Chạy trực tuyến (Online 1-Line Execution)](#41-chạy-trực-tuyến-online-1-line-execution)
   - [4.2. Chạy độc lập không cần mạng (Offline Release Package)](#42-chạy-độc-lập-không-cần-mạng-offline-release-package)
+  - [4.3. Lệnh thủ công qua ADB & Kích hoạt Private DNS](#43-lệnh-thủ-công-qua-adb--kích-hoạt-private-dns-dành-cho-nhà-phát-triển--scrcpy)
 - [5. Bảng hướng dẫn chọn Chế độ cài đặt theo cấu hình Tivi](#5-bảng-hướng-dẫn-chọn-chế-độ-cài-đặt-theo-cấu-hình-tivi)
 - [6. Danh mục 16 ứng dụng tích hợp (Leanback UI)](#6-danh-mục-16-ứng-dụng-tích-hợp-leanback-ui)
 - [7. Ma trận tương thích phần cứng (Hardware Compatibility)](#7-ma-trận-tương-thích-phần-cứng-hardware-compatibility)
@@ -75,6 +76,7 @@ Tivi Xiaomi và Redmi nội địa Trung Quốc rất phổ biến tại Việt 
 * **Accessibility Interception**: Khóa phím Home phần cứng vào Projectivy Launcher qua `ProjectivyAccessibilityService`, ngăn chặn triệt để PatchWall chiếm quyền hiển thị.
 * **Timezone & NTP Auto-Sync**: Tự động sửa lỗi lệch múi giờ Việt Nam (`GMT+7`) và trỏ máy chủ thời gian `time.android.com`, triệt tiêu tận gốc lỗi SSL Handshake trên YouTube/SmartTube và lệch lịch phát sóng EPG.
 * **Bloatware & Ad Immunity**: Vô hiệu hóa (`pm disable-user`) toàn bộ dịch vụ quảng cáo (`systemAdSolution`, `mitv.advertise`), trợ lý XiaoAI tiếng Trung, Mi Store TQ và thu thập dữ liệu ngầm (`tv.analytics`), tiết kiệm 30% RAM và băng thông mạng.
+* **Private DNS AdGuard Ad-Blocking**: Tự động kích hoạt Private DNS DoT (`dns.adguard-dns.com`), chặn đứng quảng cáo cấp DNS toàn hệ thống (app truyền hình, web browser, banner rác) mà không cần cài app VPN gây chậm mạng hay can thiệp root.
 * **Performance Tuning**: Ép tỉ lệ hoạt ảnh `0.5x` (`window_animation_scale`, `transition_animation_scale`, `animator_duration_scale`), phản hồi điều khiển tăng 200%.
 * **Curated App Ecosystem & Progress Bar**: Tự động cài trọn bộ 16 ứng dụng chuẩn Android TV (Leanback UI) với thanh tiến trình tải trực quan (`curl -#`), điều khiển mượt mà qua remote D-pad.
 * **Mobile-First UX**: Tối ưu đặc biệt cho người dùng thực thi trực tiếp bằng điện thoại di động (Android / iPhone) không cần máy tính.
@@ -196,6 +198,29 @@ Thích hợp cho thợ kỹ thuật, cửa hàng điện máy hoặc khu vực m
 1. Tải trực tiếp gói offline: **[MiTV-Vietnam-Full-Offline-v1.0.0.zip](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/MiTV-Vietnam-Full-Offline-v1.0.0.zip)** (523MB, đã tích hợp sẵn toàn bộ 16 APK và công cụ ADB) hoặc vào mục **[Releases](https://github.com/nguyenlocthanh796/mitv-vn-setup/releases)**.
 2. Giải nén file zip vào máy tính hoặc cắm USB.
 3. Click đúp vào file `setup.bat` ➔ Nhập địa chỉ IP Tivi ➔ Quá trình cài đặt diễn ra offline hoàn toàn trong 60 giây.
+
+---
+
+### 4.3. Lệnh thủ công qua ADB & Kích hoạt Private DNS (Dành cho nhà phát triển / Scrcpy)
+
+Nếu bạn đã có sẵn công cụ ADB trên máy (ví dụ trong thư mục `C:\scrcpy-win64-v4.1\` hoặc Android SDK) và muốn kết nối nhanh hoặc chỉ kích hoạt Private DNS chặn quảng cáo:
+
+```powershell
+# 1. Kết nối TV qua IP wifi (Ví dụ IP: 192.168.1.50)
+C:\scrcpy-win64-v4.1\adb.exe connect 192.168.1.50:5555
+
+# 2. Kích hoạt Private DNS AdGuard chặn đứng quảng cáo toàn diện
+C:\scrcpy-win64-v4.1\adb.exe -s 192.168.1.50:5555 shell "settings put global private_dns_mode hostname && settings put global private_dns_specifier dns.adguard-dns.com"
+```
+
+Hoặc kích hoạt nhanh qua tham số của bộ công cụ:
+```powershell
+# PowerShell (Windows)
+.\setup.ps1 -DeviceIp 192.168.1.50 -DnsOnly
+
+# Bash / Termux (Android/Linux/macOS)
+./setup.sh -d 192.168.1.50 --dns-only
+```
 
 ---
 

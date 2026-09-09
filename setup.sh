@@ -19,6 +19,7 @@ LAST_DEVICE_FILE="$CACHE_DIR/last_device.txt"
 CLI_UPDATE_TARGET=""
 CLI_RESTORE=0
 CLI_DEVICE_IP=""
+CLI_DNS_ONLY=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -36,6 +37,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --restore)
             CLI_RESTORE=1
+            shift 1
+            ;;
+        --dns-only)
+            CLI_DNS_ONLY=1
             shift 1
             ;;
         *)
@@ -202,6 +207,15 @@ if [ "$IS_READY" -eq 0 ]; then
     exit 1
 fi
 
+# Xu ly lenh kich hoat DNS neu co tham so --dns-only
+if [ "$CLI_DNS_ONLY" -eq 1 ]; then
+    echo -e "\n${GREEN}[+] Kich hoat Private DNS chan quang cao (AdGuard)...${NC}"
+    adb -s "$TARGET_DEV" shell settings put global private_dns_mode hostname 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put global private_dns_specifier dns.adguard-dns.com 2>/dev/null || true
+    echo -e "${GREEN}[OK] Da kich hoat Private DNS AdGuard (dns.adguard-dns.com) thanh cong!${NC}"
+    exit 0
+fi
+
 # Xu ly lenh khoi phuc ve goc
 if [ "$CLI_RESTORE" -eq 1 ]; then
     echo -e "\n${YELLOW}[*] Dang khoi phuc ve giao dien PatchWall goc...${NC}"
@@ -210,6 +224,8 @@ if [ "$CLI_RESTORE" -eq 1 ]; then
     adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
     adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
     adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put global private_dns_mode off 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings delete global private_dns_specifier 2>/dev/null || true
     adb -s "$TARGET_DEV" shell pm enable com.miui.systemAdSolution 2>/dev/null || true
     adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
     adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true
@@ -231,6 +247,9 @@ echo -e "\n${GREEN}[+] Sua loi lech gio (GMT+7) & Chan quang cao rac Xiaomi...${
 adb -s "$TARGET_DEV" shell settings put global ntp_server time.android.com 2>/dev/null || true
 adb -s "$TARGET_DEV" shell settings put global auto_time 1 2>/dev/null || true
 adb -s "$TARGET_DEV" shell service call alarm 3 s16 "Asia/Ho_Chi_Minh" 2>/dev/null || true
+adb -s "$TARGET_DEV" shell settings put global private_dns_mode hostname 2>/dev/null || true
+adb -s "$TARGET_DEV" shell settings put global private_dns_specifier dns.adguard-dns.com 2>/dev/null || true
+echo -e "    -> Da kich hoat Private DNS chan quang cao AdGuard (dns.adguard-dns.com)."
 
 INSTALLED_PKGS=$(adb -s "$TARGET_DEV" shell pm list packages 2>/dev/null || true)
 BLOAT_PKGS=(
@@ -373,6 +392,8 @@ else
         adb -s "$TARGET_DEV" shell settings put global window_animation_scale 1.0 2>/dev/null || true
         adb -s "$TARGET_DEV" shell settings put global transition_animation_scale 1.0 2>/dev/null || true
         adb -s "$TARGET_DEV" shell settings put global animator_duration_scale 1.0 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put global private_dns_mode off 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings delete global private_dns_specifier 2>/dev/null || true
         adb -s "$TARGET_DEV" shell pm enable com.miui.systemAdSolution 2>/dev/null || true
         adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
         adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true

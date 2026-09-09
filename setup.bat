@@ -10,7 +10,7 @@ echo.
 echo Dang khoi dong PowerShell...
 echo.
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup.ps1" %*
 
 echo.
 echo Nhan phim bat ky de thoat...
