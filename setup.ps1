@@ -166,6 +166,8 @@ if ($Restore) {
     Run-AdbShell "pm enable com.xiaomi.mitv.advertise" | Out-Null
     Run-AdbShell "pm enable com.miui.tv.analytics" | Out-Null
     Run-AdbShell "pm enable com.xiaomi.mibox.gamecenter" | Out-Null
+    Run-AdbShell "pm enable com.sohu.inputmethod.sogou.tv" | Out-Null
+    Run-AdbShell "settings put secure default_input_method '""""'" | Out-Null
     Run-AdbShell "am start -n com.mitv.tvhome/.MainActivity" | Out-Null
     Write-Host "[OK] Da khoi phuc xong! Tivi tro ve nguyen ban nha san xuat." -ForegroundColor Green
     exit 0
@@ -193,16 +195,68 @@ $bloatPackages = @(
     "com.miui.systemAdSolution",
     "com.xiaomi.mitv.advertise",
     "com.miui.tv.analytics",
-    "com.xiaomi.mibox.gamecenter"
+    "com.xiaomi.mibox.gamecenter",
+    "com.xiaomi.voicecontrol",
+    "com.xiaomi.tweather",
+    "com.xiaomi.setupwizard",
+    "com.xiaomi.mitv.shop",
+    "com.xiaomi.mitv.handbook",
+    "com.xiaomi.mitv.calendar",
+    "com.xiaomi.mitv.appstore",
+    "com.mitv.cloudcontrol",
+    "com.duokan.videodaily",
+    "com.xiaomi.mitv.karaoke.service"
 )
 foreach ($bp in $bloatPackages) {
     if ($installedPkgs -match "package:$bp") {
         Run-AdbShell "pm disable-user --user 0 $bp" | Out-Null
     }
 }
-Write-Info "Da dat may chu gio GMT+7 (time.android.com) va toi uu he thong."
+Write-Info "Da dat may chu gio GMT+7 (time.android.com) va don dep bloatware."
 
-# 4. Cai dat Launcher neu chua co
+# 4. Viet hoa he thong (Locale vi-VN) & Bo go Tieng Viet
+Write-Step "Viet hoa he thong (Locale vi-VN) & Cai bo go Tieng Viet..."
+$curLocale = (Run-AdbShell "getprop persist.sys.locale")
+if ($curLocale -notmatch "vi") {
+    Write-Info "Dang thiet lap ngon ngu Tieng Viet (vi-VN)..."
+    $appiumApk = Join-Path $CacheDir "Appium.apk"
+    if (-not (Test-Path $appiumApk)) {
+        curl.exe -L -s -o $appiumApk "https://raw.githubusercontent.com/vinh97/CAI-TIENG-VIET-TV-XIAOMI/main/lang/Appium.apk"
+    }
+    if (Test-Path $appiumApk) {
+        & $Adb -s $targetDevice install -r -g $appiumApk 2>&1 | Out-Null
+        Run-AdbShell "pm grant io.appium.settings android.permission.CHANGE_CONFIGURATION" | Out-Null
+        Run-AdbShell "am broadcast -a io.appium.settings.locale -n io.appium.settings/.receivers.LocaleSettingReceiver --es lang vi --es country VN" | Out-Null
+        Run-AdbShell "pm uninstall io.appium.settings" | Out-Null
+        Write-Info "Da chuyen ngon ngu he thong sang Tieng Viet!"
+    }
+} else {
+    Write-Info "Ngon ngu he thong: Tieng Viet ($($curLocale.Trim()))."
+}
+
+# Bo go Tieng Viet LeanKey Keyboard
+$imeInstalled = (Run-AdbShell "pm list packages com.liskovsoft.leankeyboard") -match "com.liskovsoft.leankeyboard"
+if (-not $imeInstalled) {
+    Write-Info "Dang tai va cai dat bo go LeanKey Keyboard Tieng Viet..."
+    $leanKeyApk = Join-Path $CacheDir "LeanKey.apk"
+    if (-not (Test-Path $leanKeyApk)) {
+        curl.exe -L -s -o $leanKeyApk "https://raw.githubusercontent.com/vinh97/CAI-TIENG-VIET-TV-XIAOMI/main/lang/LeanKey.apk"
+    }
+    if (Test-Path $leanKeyApk) {
+        & $Adb -s $targetDevice install -r -g $leanKeyApk 2>&1 | Out-Null
+    }
+}
+Run-AdbShell "ime enable com.liskovsoft.leankeyboard/.ime.LeanbackImeService" | Out-Null
+Run-AdbShell "ime set com.liskovsoft.leankeyboard/.ime.LeanbackImeService" | Out-Null
+Run-AdbShell "settings put secure default_input_method com.liskovsoft.leankeyboard/.ime.LeanbackImeService" | Out-Null
+
+if ($installedPkgs -match "com.sohu.inputmethod.sogou.tv") {
+    Run-AdbShell "pm disable-user --user 0 com.sohu.inputmethod.sogou.tv" | Out-Null
+    Write-Info "Da vo hieu hoa bo go goc tieng Trung Sogou."
+}
+Write-Info "Da kich hoat bo go Tieng Viet LeanKey mac dinh."
+
+# 5. Cai dat Launcher neu chua co
 $launcherInstalled = (Run-AdbShell "pm list packages com.spocky.projengmenu") -match "com.spocky.projengmenu"
 if (-not $launcherInstalled) {
     Write-Step "Cai dat Projectivy Launcher (Chan PatchWall)..."
@@ -395,7 +449,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
                 } | Select-Object -ExpandProperty FullName
 
                 if ($splitApks.Count -gt 1) {
-                    & $Adb -s $targetDevice install-multiple -r -g $splitApks | Out-Null
+                    & $Adb -s $targetDevice install-multiple -r -d -g $splitApks 2>&1 | Out-Null
                 } else {
                     $singleApk = Get-ChildItem -Path $extractFolder -Filter "*.apk" | Select-Object -First 1 -ExpandProperty FullName
                     & $Adb -s $targetDevice install -r -d -g $singleApk | Out-Null

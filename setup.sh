@@ -121,6 +121,8 @@ if [ "$CLI_RESTORE" -eq 1 ]; then
     adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
     adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true
     adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mibox.gamecenter 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell pm enable com.sohu.inputmethod.sogou.tv 2>/dev/null || true
+    adb -s "$TARGET_DEV" shell settings put secure default_input_method '""' 2>/dev/null || true
     adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
     echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
     exit 0
@@ -138,11 +140,67 @@ adb -s "$TARGET_DEV" shell settings put global auto_time 1 2>/dev/null || true
 adb -s "$TARGET_DEV" shell service call alarm 3 s16 "Asia/Ho_Chi_Minh" 2>/dev/null || true
 
 INSTALLED_PKGS=$(adb -s "$TARGET_DEV" shell pm list packages 2>/dev/null || true)
-for bp in com.miui.systemAdSolution com.xiaomi.mitv.advertise com.miui.tv.analytics com.xiaomi.mibox.gamecenter; do
+BLOAT_PKGS=(
+    "com.miui.systemAdSolution"
+    "com.xiaomi.mitv.advertise"
+    "com.miui.tv.analytics"
+    "com.xiaomi.mibox.gamecenter"
+    "com.xiaomi.voicecontrol"
+    "com.xiaomi.tweather"
+    "com.xiaomi.setupwizard"
+    "com.xiaomi.mitv.shop"
+    "com.xiaomi.mitv.handbook"
+    "com.xiaomi.mitv.calendar"
+    "com.xiaomi.mitv.appstore"
+    "com.mitv.cloudcontrol"
+    "com.duokan.videodaily"
+    "com.xiaomi.mitv.karaoke.service"
+)
+for bp in "${BLOAT_PKGS[@]}"; do
     if echo "$INSTALLED_PKGS" | grep -q "package:$bp"; then
         adb -s "$TARGET_DEV" shell pm disable-user --user 0 "$bp" >/dev/null 2>&1 || true
     fi
 done
+
+echo -e "\n${GREEN}[+] Viet hoa he thong (Locale vi-VN) & Bo go Tieng Viet...${NC}"
+CUR_LOCALE=$(adb -s "$TARGET_DEV" shell getprop persist.sys.locale 2>/dev/null || true)
+if [[ "$CUR_LOCALE" != *"vi"* ]]; then
+    echo -e "    -> Dang thiet lap ngon ngu Tieng Viet (vi-VN)..."
+    APPIUM_APK="$CACHE_DIR/Appium.apk"
+    if [ ! -f "$APPIUM_APK" ]; then
+        curl -L -s -o "$APPIUM_APK" "https://raw.githubusercontent.com/vinh97/CAI-TIENG-VIET-TV-XIAOMI/main/lang/Appium.apk"
+    fi
+    if [ -f "$APPIUM_APK" ]; then
+        adb -s "$TARGET_DEV" install -r -g "$APPIUM_APK" >/dev/null 2>&1 || true
+        adb -s "$TARGET_DEV" shell pm grant io.appium.settings android.permission.CHANGE_CONFIGURATION >/dev/null 2>&1 || true
+        adb -s "$TARGET_DEV" shell am broadcast -a io.appium.settings.locale -n io.appium.settings/.receivers.LocaleSettingReceiver --es lang vi --es country VN >/dev/null 2>&1 || true
+        adb -s "$TARGET_DEV" shell pm uninstall io.appium.settings >/dev/null 2>&1 || true
+        echo -e "    -> Da chuyen ngon ngu he thong sang Tieng Viet!"
+    fi
+else
+    echo -e "    -> Ngon ngu he thong: Tieng Viet ($CUR_LOCALE)."
+fi
+
+# Bo go Tieng Viet LeanKey Keyboard
+if ! echo "$INSTALLED_PKGS" | grep -q "com.liskovsoft.leankeyboard"; then
+    echo -e "    -> Dang tai va cai dat bo go LeanKey Keyboard Tieng Viet..."
+    LEANKEY_APK="$CACHE_DIR/LeanKey.apk"
+    if [ ! -f "$LEANKEY_APK" ]; then
+        curl -L -s -o "$LEANKEY_APK" "https://raw.githubusercontent.com/vinh97/CAI-TIENG-VIET-TV-XIAOMI/main/lang/LeanKey.apk"
+    fi
+    if [ -f "$LEANKEY_APK" ]; then
+        adb -s "$TARGET_DEV" install -r -g "$LEANKEY_APK" >/dev/null 2>&1 || true
+    fi
+fi
+adb -s "$TARGET_DEV" shell ime enable com.liskovsoft.leankeyboard/.ime.LeanbackImeService >/dev/null 2>&1 || true
+adb -s "$TARGET_DEV" shell ime set com.liskovsoft.leankeyboard/.ime.LeanbackImeService >/dev/null 2>&1 || true
+adb -s "$TARGET_DEV" shell settings put secure default_input_method com.liskovsoft.leankeyboard/.ime.LeanbackImeService >/dev/null 2>&1 || true
+
+if echo "$INSTALLED_PKGS" | grep -q "com.sohu.inputmethod.sogou.tv"; then
+    adb -s "$TARGET_DEV" shell pm disable-user --user 0 com.sohu.inputmethod.sogou.tv >/dev/null 2>&1 || true
+    echo -e "    -> Da vo hieu hoa bo go goc tieng Trung Sogou."
+fi
+echo -e "    -> Da kich hoat bo go Tieng Viet LeanKey mac dinh."
 
 # Kiem tra launcher
 if ! echo "$INSTALLED_PKGS" | grep -q "com.spocky.projengmenu"; then
@@ -225,6 +283,8 @@ else
         adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mitv.advertise 2>/dev/null || true
         adb -s "$TARGET_DEV" shell pm enable com.miui.tv.analytics 2>/dev/null || true
         adb -s "$TARGET_DEV" shell pm enable com.xiaomi.mibox.gamecenter 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell pm enable com.sohu.inputmethod.sogou.tv 2>/dev/null || true
+        adb -s "$TARGET_DEV" shell settings put secure default_input_method '""' 2>/dev/null || true
         adb -s "$TARGET_DEV" shell am start -n com.mitv.tvhome/.MainActivity 2>/dev/null || true
         echo -e "${GREEN}[OK] Da khoi phuc xong! Tivi tro ve nguyen ban xuat xuong.${NC}"
         exit 0
@@ -325,7 +385,7 @@ for item in "${INSTALL_TARGETS[@]}"; do
             unzip -q -o "$TARGET_FILE" -d "$XAPK_DIR" 2>/dev/null || true
             split_files=("$XAPK_DIR"/*.apk)
             if [ -f "${split_files[0]}" ]; then
-                adb -s "$TARGET_DEV" install-multiple -r -g "${split_files[@]}" >/dev/null 2>&1 || true
+                adb -s "$TARGET_DEV" install-multiple -r -d -g "${split_files[@]}" >/dev/null 2>&1 || true
             else
                 adb -s "$TARGET_DEV" install -r -d -g "$TARGET_FILE" >/dev/null 2>&1 || true
             fi
