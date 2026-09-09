@@ -27,3 +27,4 @@ jobs:
           generate_release_notes: true
           files: |
             *.zip
+            release/*.zip
