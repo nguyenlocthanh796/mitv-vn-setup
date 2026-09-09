@@ -27,6 +27,7 @@ if (-not $RepoRoot) {
 $CacheDir = Join-Path $RepoRoot ".cache"
 $BinDir   = Join-Path $RepoRoot "bin"
 $ApksDir  = Join-Path $RepoRoot "apks"
+$LastDeviceFile = Join-Path $CacheDir "last_device.txt"
 
 if (-not (Test-Path $CacheDir)) { New-Item -ItemType Directory -Path $CacheDir -Force | Out-Null }
 if (-not (Test-Path $BinDir))   { New-Item -ItemType Directory -Path $BinDir -Force | Out-Null }
@@ -54,6 +55,76 @@ function Write-Err {
     Write-Host "    [X] $Msg" -ForegroundColor Red
 }
 
+function Test-AdbPort {
+    param([string]$Ip, [int]$TimeoutMs = 1000)
+    try {
+        $tcp = New-Object System.Net.Sockets.TcpClient
+        $task = $tcp.ConnectAsync($Ip, 5555)
+        if ($task.Wait($TimeoutMs)) {
+            $tcp.Close()
+            return $true
+        }
+        $tcp.Close()
+        return $false
+    } catch {
+        return $false
+    }
+}
+
+function Discover-TvDevice {
+    param([string]$CacheFile)
+
+    # 1. Thu ket noi lai IP cu da luu trong cache
+    if ($CacheFile -and (Test-Path $CacheFile)) {
+        $lastIp = (Get-Content $CacheFile -Raw).Trim()
+        if ($lastIp) {
+            $checkIp = ($lastIp -split ':')[0]
+            Write-Info "Thu ket noi lai thiet bi gan nhat: $lastIp..."
+            if (Test-AdbPort $checkIp 1000) {
+                Write-Info "Phat hien thiet bi cu dang online!"
+                return $lastIp
+            }
+        }
+    }
+
+    # 2. Quet nhanh bang ARP tim thiet bi mo cong ADB 5555
+    Write-Info "Dang tu dong quet mang LAN tim Tivi Xiaomi (port 5555)..."
+    $arpOutput = arp -a
+    $candidateIps = @()
+    foreach ($line in ($arpOutput -split "`r?`n")) {
+        if ($line -match "^\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\s+") {
+            $ip = $matches[1]
+            if (($ip -match '^192\.168\.' -or $ip -match '^10\.' -or $ip -match '^172\.') -and $ip -notmatch '\.255$' -and $ip -notmatch '\.1$') {
+                $candidateIps += $ip
+            }
+        }
+    }
+
+    $candidateIps = $candidateIps | Select-Object -Unique
+    $foundList = @()
+    foreach ($ip in $candidateIps) {
+        if (Test-AdbPort $ip 800) {
+            $foundList += "$($ip):5555"
+        }
+    }
+
+    if ($foundList.Count -eq 1) {
+        Write-Info "Tu dong tim thay Tivi tai: $($foundList[0])"
+        return $foundList[0]
+    } elseif ($foundList.Count -gt 1) {
+        Write-Host "`nTim thay nhieu thiet bi ADB trong mang LAN:" -ForegroundColor Yellow
+        for ($i = 0; $i -lt $foundList.Count; $i++) {
+            Write-Host "  [$($i+1)] $($foundList[$i])"
+        }
+        $sel = Read-Host "Chon thiet bi (1-$($foundList.Count))"
+        if ($sel -match '^\d+$' -and [int]$sel -ge 1 -and [int]$sel -le $foundList.Count) {
+            return $foundList[[int]$sel - 1]
+        }
+    }
+
+    return $null
+}
+
 Clear-Host
 Write-Host @"
 ===================================================================
@@ -75,7 +146,7 @@ if (-not $adbFound) {
     } else {
         Write-Info "Dang tai Android Platform Tools ve may..."
         $adbZip = Join-Path $CacheDir "platform-tools.zip"
-        curl.exe -L -o $adbZip "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
+        curl.exe -L --progress-bar -o $adbZip "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::ExtractToDirectory($adbZip, $CacheDir)
         Copy-Item (Join-Path $CacheDir "platform-tools\adb.exe") $BinDir -Force
@@ -98,18 +169,39 @@ if ($DeviceIp) {
     & $Adb connect $targetDevice | Out-Null
 } else {
     $devicesOutput = & $Adb devices
-    $lines = $devicesOutput | Where-Object { $_ -match "\s+device$" }
-    if ($lines.Count -eq 1) {
-        $targetDevice = ($lines[0] -split "\s+")[0]
-        Write-Info "Phat hien 1 thiet bi duy nhat: $targetDevice"
-    } elseif ($lines.Count -gt 1) {
-        Write-Host "`nDanh sach thiet bi ket noi:" -ForegroundColor Yellow
-        for ($i = 0; $i -lt $lines.Count; $i++) {
-            $devName = ($lines[$i] -split "\s+")[0]
-            Write-Host "  [$($i+1)] $devName"
+    $lines = @($devicesOutput | Where-Object { $_ -match "\s+device$" })
+    $realDevices = @($lines | Where-Object { ($_ -split "\s+")[0] -notmatch '^emulator-\d+' })
+
+    if ($LastDeviceFile -and (Test-Path $LastDeviceFile)) {
+        $lastDev = (Get-Content $LastDeviceFile -Raw).Trim()
+        if ($lastDev -and ($lines | Where-Object { $_ -match [regex]::Escape($lastDev) })) {
+            $targetDevice = $lastDev
+            Write-Info "Tu dong chon thiet bi gan nhat: $targetDevice"
         }
-        $sel = Read-Host "Chon thiet bi (1-$($lines.Count))"
-        $targetDevice = ($lines[[int]$sel - 1] -split "\s+")[0]
+    }
+
+    if (-not $targetDevice) {
+        if ($realDevices.Count -eq 1) {
+            $targetDevice = ($realDevices[0] -split "\s+")[0]
+            Write-Info "Phat hien thiet bi san co: $targetDevice"
+        } elseif ($realDevices.Count -gt 1) {
+            Write-Host "`nDanh sach thiet bi ket noi:" -ForegroundColor Yellow
+            for ($i = 0; $i -lt $realDevices.Count; $i++) {
+                $devName = ($realDevices[$i] -split "\s+")[0]
+                Write-Host "  [$($i+1)] $devName"
+            }
+            $sel = Read-Host "Chon thiet bi (1-$($realDevices.Count))"
+            if ($sel -match '^\d+$' -and [int]$sel -ge 1 -and [int]$sel -le $realDevices.Count) {
+                $targetDevice = ($realDevices[[int]$sel - 1] -split "\s+")[0]
+            }
+        } else {
+            # Khong co thiet bi thuc nao dang ket noi -> Quet mang LAN
+            $autoDev = Discover-TvDevice -CacheFile $LastDeviceFile
+            if ($autoDev) {
+                $targetDevice = $autoDev
+                & $Adb connect $targetDevice | Out-Null
+            }
+        }
     }
 }
 
@@ -120,33 +212,34 @@ if (-not $targetDevice) {
     $targetDevice = if ($cleanIp -match ':\d+$') { $cleanIp } else { "$cleanIp`:5555" }
     Write-Info "Dang ket noi toi $targetDevice..."
     & $Adb connect $targetDevice | Out-Null
+}
 
-    # Kiem tra xac nhan tren man hinh Tivi
-    $isReady = $false
-    for ($i = 1; $i -le 10; $i++) {
-        $devLine = (& $Adb devices) | Where-Object { $_ -match [regex]::Escape($targetDevice) }
-        if ($devLine -match "\s+device$") {
-            $isReady = $true
-            break
-        } elseif ($devLine -match "\s+unauthorized$") {
-            Write-Warn "TIVI DANG CHO XAC NHAN!"
-            Write-Host "    >> NHIN LEN MAN HINH TIVI: Tich 'Luon cho phep' va bam OK bang remote! ($i/10)" -ForegroundColor Yellow
-            Start-Sleep -Seconds 2
-        } else {
-            Start-Sleep -Seconds 1
-        }
+# Kiem tra xac nhan tren man hinh Tivi
+$isReady = $false
+for ($i = 1; $i -le 10; $i++) {
+    $devLine = (& $Adb devices) | Where-Object { $_ -match [regex]::Escape($targetDevice) }
+    if ($devLine -match "\s+device$") {
+        $isReady = $true
+        Set-Content -Path $LastDeviceFile -Value $targetDevice -Force
+        break
+    } elseif ($devLine -match "\s+unauthorized$") {
+        Write-Warn "TIVI DANG CHO XAC NHAN!"
+        Write-Host "    >> NHIN LEN MAN HINH TIVI: Tich 'Luon cho phep' va bam OK bang remote! ($i/10)" -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
+    } else {
+        Start-Sleep -Seconds 1
     }
+}
 
-    if (-not $isReady) {
-        Write-Err "KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!"
-        Write-Host @"
+if (-not $isReady) {
+    Write-Err "KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!"
+    Write-Host @"
 Huong dan xu ly:
   1. Dam bao Tivi va May tinh ket noi CUNG 1 ten Wi-Fi.
   2. Kiem tra da bat 'Go loi USB (ADB Debugging)' trong Cai dat nha phat trien.
   3. Neu Tivi hien hop thoai xac nhan, hay dung remote bam 'Luon cho phep'.
 "@ -ForegroundColor Yellow
-        exit 1
-    }
+    exit 1
 }
 
 function Run-AdbShell {
@@ -267,7 +360,7 @@ if (-not $launcherInstalled) {
         $projectivyFile = $offlineProjectivy
     } elseif (-not (Test-Path $projectivyFile)) {
         Write-Info "Dang tai Projectivy Launcher tu GitHub Release..."
-        curl.exe -L -s -o $projectivyFile "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/ProjectivyLauncher.apk"
+        curl.exe -L --progress-bar -o $projectivyFile "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/ProjectivyLauncher.apk"
     }
 
     Write-Info "Dang cai dat Projectivy vao Tivi..."
@@ -427,7 +520,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             if (-not (Test-Path $cachedFile)) {
                 Write-Info "Dang tai tu CDN GitHub Release..."
                 $downUrl = if ($app.download_url) { $app.download_url } else { "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/$assetFile" }
-                curl.exe -L -s -o $cachedFile $downUrl
+                curl.exe -L --progress-bar -o $cachedFile $downUrl
             }
             $sourceFile = $cachedFile
         }
@@ -437,7 +530,7 @@ if (-not $SkipApps -and -not $DebloatOnly) {
             continue
         }
 
-        Write-Info "Dang cai dat / ghi de (giu nguyen data)..."
+        Write-Info "Dang nap vao TV qua mang Wi-Fi (giu nguyen data)..."
         if ($sourceFile -like "*.xapk") {
             Add-Type -AssemblyName System.IO.Compression.FileSystem
             $extractFolder = Join-Path $CacheDir "$($app.id)_split"

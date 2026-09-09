@@ -68,12 +68,14 @@ Tivi Xiaomi và Redmi nội địa Trung Quốc rất phổ biến tại Việt 
 * Can thiệp nạp ROM cook qua USB tiềm ẩn nguy cơ **brick phần cứng**, mất bảo hành và mất tính năng cập nhật OTA.
 
 **MiTV Vietnam Toolkit** giải quyết triệt để bài toán này bằng công nghệ tự động hóa qua giao thức ADB:
+* **LAN Auto-Discovery & Caching**: Tự động quét tìm địa chỉ IP Tivi Xiaomi trong mạng LAN (Auto-discovery) và ghi nhớ thiết bị cũ (Device Caching) kết nối lại tức thì trong 1 giây mà không cần người dùng nhập IP thủ công.
+* **Vietnamese System Locale & Keyboard**: Tự động chuyển ngôn ngữ hệ thống sang Tiếng Việt (`vi-VN`), cài đặt bộ gõ tiếng Việt TV (`LeanKey Keyboard`) và vô hiệu hóa bàn phím Trung Quốc Sogou.
 * **Zero Root / Zero Brick**: Chỉ giao tiếp qua cổng ADB Userland, bảo toàn 100% phân vùng hệ thống và chế độ bảo hành nhà sản xuất.
 * **Accessibility Interception**: Khóa phím Home phần cứng vào Projectivy Launcher qua `ProjectivyAccessibilityService`, ngăn chặn triệt để PatchWall chiếm quyền hiển thị.
 * **Timezone & NTP Auto-Sync**: Tự động sửa lỗi lệch múi giờ Việt Nam (`GMT+7`) và trỏ máy chủ thời gian `time.android.com`, triệt tiêu tận gốc lỗi SSL Handshake trên YouTube/SmartTube và lệch lịch phát sóng EPG.
-* **Bloatware & Ad Immunity**: Vô hiệu hóa (`pm disable-user`) các dịch vụ quảng cáo (`systemAdSolution`, `mitv.advertise`) và thu thập dữ liệu ngầm (`tv.analytics`), tiết kiệm 30% RAM và băng thông mạng.
+* **Bloatware & Ad Immunity**: Vô hiệu hóa (`pm disable-user`) toàn bộ dịch vụ quảng cáo (`systemAdSolution`, `mitv.advertise`), trợ lý XiaoAI tiếng Trung, Mi Store TQ và thu thập dữ liệu ngầm (`tv.analytics`), tiết kiệm 30% RAM và băng thông mạng.
 * **Performance Tuning**: Ép tỉ lệ hoạt ảnh `0.5x` (`window_animation_scale`, `transition_animation_scale`, `animator_duration_scale`), phản hồi điều khiển tăng 200%.
-* **Curated App Ecosystem**: Tự động cài trọn bộ 16 ứng dụng chuẩn Android TV (Leanback UI) điều khiển mượt mà qua remote D-pad.
+* **Curated App Ecosystem & Progress Bar**: Tự động cài trọn bộ 16 ứng dụng chuẩn Android TV (Leanback UI) với thanh tiến trình tải trực quan (`curl -#`), điều khiển mượt mà qua remote D-pad.
 * **Mobile-First UX**: Tối ưu đặc biệt cho người dùng thực thi trực tiếp bằng điện thoại di động (Android / iPhone) không cần máy tính.
 
 ---
@@ -97,6 +99,7 @@ Tivi Xiaomi và Redmi nội địa Trung Quốc rất phổ biến tại Việt 
 
 ### Bước 3: Xác định địa chỉ IP nội mạng của Tivi
 * Vào mục `Network / Wi-Fi` trên Tivi ➔ Chọn mạng Wi-Fi đang kết nối ➔ Ghi nhận địa chỉ IP (Ví dụ: `192.168.1.50`).
+* **Lưu ý**: Bộ công cụ hiện đã có tính năng **Tự động quét tìm IP Tivi (Auto-discovery)** và **Ghi nhớ thiết bị cũ (Device Caching)**. Trong hầu hết trường hợp, bạn không cần nhập IP, script sẽ tự động tìm và kết nối tới Tivi!
 
 ---
 

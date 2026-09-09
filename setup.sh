@@ -14,9 +14,11 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="$SCRIPT_DIR/.cache"
 mkdir -p "$CACHE_DIR"
+LAST_DEVICE_FILE="$CACHE_DIR/last_device.txt"
 
 CLI_UPDATE_TARGET=""
 CLI_RESTORE=0
+CLI_DEVICE_IP=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -27,6 +29,10 @@ while [[ $# -gt 0 ]]; do
         --update-all)
             CLI_UPDATE_TARGET="all"
             shift 1
+            ;;
+        --device-ip|-d)
+            CLI_DEVICE_IP="$2"
+            shift 2
             ;;
         --restore)
             CLI_RESTORE=1
@@ -50,28 +56,114 @@ if ! command -v adb &> /dev/null; then
     exit 1
 fi
 
+test_adb_port() {
+    local ip="$1"
+    if command -v nc >/dev/null 2>&1; then
+        nc -z -w 1 "$ip" 5555 >/dev/null 2>&1
+        return $?
+    fi
+    (exec 3<>/dev/tcp/"$ip"/5555) >/dev/null 2>&1 && exec 3>&-
+    return $?
+}
+
+discover_tv_device() {
+    if [ -f "$LAST_DEVICE_FILE" ]; then
+        local last_ip
+        last_ip=$(tr -d '[:space:]' < "$LAST_DEVICE_FILE")
+        if [ -n "$last_ip" ]; then
+            local check_ip="${last_ip%%:*}"
+            echo -e "    -> Thu ket noi lai thiet bi gan nhat: $last_ip..." >&2
+            if test_adb_port "$check_ip"; then
+                echo -e "    -> ${GREEN}[OK] Phat hien thiet bi cu dang online!${NC}" >&2
+                echo "$last_ip"
+                return
+            fi
+        fi
+    fi
+
+    echo -e "    -> Dang tu dong quet mang LAN tim Tivi Xiaomi (port 5555)..." >&2
+    local arp_ips
+    arp_ips=$(arp -a 2>/dev/null | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | grep -vE '(\.255|\.1)$|^127\.|^224\.' | sort -u || true)
+    local found_devs=()
+    for ip in $arp_ips; do
+        if test_adb_port "$ip"; then
+            found_devs+=("${ip}:5555")
+        fi
+    done
+
+    if [ ${#found_devs[@]} -eq 1 ]; then
+        echo -e "    -> ${GREEN}[OK] Tu dong tim thay Tivi tai: ${found_devs[0]}${NC}" >&2
+        echo "${found_devs[0]}"
+        return
+    elif [ ${#found_devs[@]} -gt 1 ]; then
+        echo -e "${YELLOW}Tim thay nhieu thiet bi ADB trong mang LAN:${NC}" >&2
+        local idx=1
+        for d in "${found_devs[@]}"; do
+            echo "  [$idx] $d" >&2
+            idx=$((idx + 1))
+        done
+        local sel
+        read -r -p "Chon thiet bi (1-${#found_devs[@]}): " sel
+        if [[ "$sel" =~ ^[0-9]+$ ]] && [ "$sel" -ge 1 ] && [ "$sel" -le "${#found_devs[@]}" ]; then
+            echo "${found_devs[$((sel - 1))]}"
+            return
+        fi
+    fi
+}
+
 adb start-server > /dev/null 2>&1
 
-DEVICES=$(adb devices | grep -E '\s+device$' | awk '{print $1}')
-DEV_COUNT=0
-if [ -n "$DEVICES" ]; then
-    DEV_COUNT=$(echo "$DEVICES" | grep -c '[^[:space:]]' || true)
+TARGET_DEV=""
+if [ -n "$CLI_DEVICE_IP" ]; then
+    CLEAN_IP=$(echo "$CLI_DEVICE_IP" | sed -e 's|^https*://||' -e 's|/.*$||' | tr -d '[:space:]')
+    if [[ "$CLEAN_IP" != *:* ]]; then
+        TARGET_DEV="${CLEAN_IP}:5555"
+    else
+        TARGET_DEV="$CLEAN_IP"
+    fi
+    echo -e "    -> Ket noi toi IP chi dinh: $TARGET_DEV"
+    adb connect "$TARGET_DEV" >/dev/null 2>&1 || true
+else
+    DEVICES=$(adb devices | grep -E '\s+device$' | awk '{print $1}')
+    REAL_DEVS=$(echo "$DEVICES" | grep -vE '^emulator-[0-9]+' || true)
+
+    if [ -f "$LAST_DEVICE_FILE" ]; then
+        LAST_SAVED=$(tr -d '[:space:]' < "$LAST_DEVICE_FILE")
+        if [ -n "$LAST_SAVED" ] && echo "$DEVICES" | grep -q "$LAST_SAVED"; then
+            TARGET_DEV="$LAST_SAVED"
+            echo -e "    -> Tu dong chon thiet bi gan nhat: $TARGET_DEV"
+        fi
+    fi
+
+    if [ -z "$TARGET_DEV" ]; then
+        DEV_COUNT=0
+        if [ -n "$REAL_DEVS" ]; then
+            DEV_COUNT=$(echo "$REAL_DEVS" | grep -c '[^[:space:]]' || true)
+        fi
+
+        if [ "$DEV_COUNT" -eq 1 ]; then
+            TARGET_DEV="$REAL_DEVS"
+            echo -e "${GREEN}[+] Phat hien thiet bi san co: $TARGET_DEV${NC}"
+        elif [ "$DEV_COUNT" -gt 1 ]; then
+            echo -e "${YELLOW}Danh sach thiet bi ket noi:${NC}"
+            echo "$REAL_DEVS"
+            read -r -p "Chon thiet bi: " TARGET_DEV
+        else
+            AUTO_DEV=$(discover_tv_device)
+            if [ -n "$AUTO_DEV" ]; then
+                TARGET_DEV="$AUTO_DEV"
+                adb connect "$TARGET_DEV" >/dev/null 2>&1 || true
+            fi
+        fi
+    fi
 fi
 
-if [ "$DEV_COUNT" -eq 1 ]; then
-    TARGET_DEV="$DEVICES"
-    echo -e "${GREEN}[+] Phat hien thiet bi: $TARGET_DEV${NC}"
-elif [ "$DEV_COUNT" -gt 1 ]; then
-    echo -e "${YELLOW}Danh sach thiet bi ket noi:${NC}"
-    echo "$DEVICES"
-    read -r -p "Chon thiet bi: " TARGET_DEV
-else
+if [ -z "$TARGET_DEV" ]; then
     read -r -p "Nhap dia chi IP Tivi Xiaomi (VD: 192.168.1.50): " RAW_IP
     if [ -z "$RAW_IP" ]; then
         echo -e "${RED}[X] Chua nhap IP. Thoat.${NC}"
         exit 1
     fi
-    # Chuan hoa dia chi IP cho nguoi moi (loai bo http:// va khoang trang)
     CLEAN_IP=$(echo "$RAW_IP" | sed -e 's|^https*://||' -e 's|/.*$||' | tr -d '[:space:]')
     if [[ "$CLEAN_IP" != *:* ]]; then
         TARGET_DEV="${CLEAN_IP}:5555"
@@ -80,33 +172,34 @@ else
     fi
     echo -e "${CYAN}[*] Dang ket noi toi $TARGET_DEV...${NC}"
     adb connect "$TARGET_DEV" >/dev/null 2>&1 || true
+fi
 
-    # Kiem tra xac nhan tren man hinh Tivi
-    IS_READY=0
-    for i in {1..10}; do
-        DEV_STATUS=$(adb devices | grep "$TARGET_DEV" | awk '{print $2}' || true)
-        if [ "$DEV_STATUS" = "device" ]; then
-            IS_READY=1
-            break
-        elif [ "$DEV_STATUS" = "unauthorized" ]; then
-            echo -e "${YELLOW}[!] TIVI DANG CHO XAC NHAN!${NC}"
-            echo -e "${YELLOW}    >> NHIN LEN MAN HINH TIVI: Bam 'Luon cho phep' bang remote! (Lan $i/10)${NC}"
-            sleep 2
-        else
-            sleep 1
-        fi
-    done
-
-    if [ "$IS_READY" -eq 0 ]; then
-        echo -e "\n${RED}====================================================${NC}"
-        echo -e "${RED}[X] KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!   ${NC}"
-        echo -e "${RED}====================================================${NC}"
-        echo -e "Huong dan xu ly nhanh:"
-        echo -e "  1. Tivi va dien thoai phai bat CUNG 1 mang Wi-Fi."
-        echo -e "  2. Kiem tra da bat 'ADB debugging' trong Cai dat nha phat trien."
-        echo -e "  3. Neu man hinh Tivi hien hop thoai, hay bam 'Luon cho phep'."
-        exit 1
+# Kiem tra xac nhan tren man hinh Tivi
+IS_READY=0
+for i in {1..10}; do
+    DEV_STATUS=$(adb devices | grep "$TARGET_DEV" | awk '{print $2}' || true)
+    if [ "$DEV_STATUS" = "device" ]; then
+        IS_READY=1
+        echo "$TARGET_DEV" > "$LAST_DEVICE_FILE"
+        break
+    elif [ "$DEV_STATUS" = "unauthorized" ]; then
+        echo -e "${YELLOW}[!] TIVI DANG CHO XAC NHAN!${NC}"
+        echo -e "${YELLOW}    >> NHIN LEN MAN HINH TIVI: Bam 'Luon cho phep' bang remote! (Lan $i/10)${NC}"
+        sleep 2
+    else
+        sleep 1
     fi
+done
+
+if [ "$IS_READY" -eq 0 ]; then
+    echo -e "\n${RED}====================================================${NC}"
+    echo -e "${RED}[X] KHONG THE KET NOI HOAC TIVI TU CHOI XAC NHAN!   ${NC}"
+    echo -e "${RED}====================================================${NC}"
+    echo -e "Huong dan xu ly nhanh:"
+    echo -e "  1. Tivi va May tinh phai bat CUNG 1 mang Wi-Fi."
+    echo -e "  2. Kiem tra da bat 'ADB debugging' trong Cai dat nha phat trien."
+    echo -e "  3. Neu man hinh Tivi hien hop thoai, hay bam 'Luon cho phep'."
+    exit 1
 fi
 
 # Xu ly lenh khoi phuc ve goc
@@ -207,7 +300,8 @@ if ! echo "$INSTALLED_PKGS" | grep -q "com.spocky.projengmenu"; then
     echo -e "\n${GREEN}[+] Cai dat Projectivy Launcher (Chan PatchWall)...${NC}"
     PROJECTIVY_APK="$CACHE_DIR/ProjectivyLauncher.apk"
     if [ ! -f "$PROJECTIVY_APK" ]; then
-        curl -L -s -o "$PROJECTIVY_APK" "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/ProjectivyLauncher.apk"
+        echo -e "    -> Dang tai Projectivy Launcher tu GitHub Release..."
+        curl -L --progress-bar -o "$PROJECTIVY_APK" "https://github.com/nguyenlocthanh796/mitv-vn-setup/releases/download/v1.0.0/ProjectivyLauncher.apk"
     fi
     adb -s "$TARGET_DEV" install -r -g "$PROJECTIVY_APK" >/dev/null 2>&1 || true
     adb -s "$TARGET_DEV" shell cmd package set-home-activity com.spocky.projengmenu/.ui.home.MainActivity 2>/dev/null || true
@@ -374,11 +468,11 @@ for item in "${INSTALL_TARGETS[@]}"; do
 
     if [ ! -f "$TARGET_FILE" ]; then
         echo -e "      Dang tai tu CDN GitHub Release..."
-        curl -L -s -o "$TARGET_FILE" "$app_url"
+        curl -L --progress-bar -o "$TARGET_FILE" "$app_url"
     fi
 
     if [ -f "$TARGET_FILE" ] && [ -s "$TARGET_FILE" ]; then
-        echo -e "      Dang cai dat / ghi de (giu nguyen data)..."
+        echo -e "      Dang nap vao TV qua mang Wi-Fi (giu nguyen data)..."
         if [[ "$TARGET_FILE" == *.xapk ]]; then
             XAPK_DIR="$CACHE_DIR/${app_id}_split"
             rm -rf "$XAPK_DIR" && mkdir -p "$XAPK_DIR"
